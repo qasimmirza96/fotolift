@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import TabNavigator from './TabNavigator';
+import SplashScreen from '../screens/SplashScreen';
 
-console.log('🚀 PlainNavigator: Loading with TabNavigator...');
+console.log('🚀 PlainNavigator: Loading with splash and tabs...');
 
 const PlainNavigator = () => {
-  console.log('🧭 PlainNavigator: Rendering with bottom tabs...');
+  const [showSplash, setShowSplash] = useState(true);
+  
+  console.log('🧭 PlainNavigator: Rendering...', { showSplash });
+  
+  if (showSplash) {
+    return (
+      <SplashScreen onFinish={() => setShowSplash(false)} />
+    );
+  }
+  
   return (
     <View style={styles.container}>
       <TabNavigator />

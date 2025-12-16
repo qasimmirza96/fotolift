@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import ExploreScreen from '../screens/ExploreScreen';
@@ -21,7 +21,7 @@ const TabNavigator = () => {
     }
   };
 
-  const TabButton = ({ iconName, isActive, onPress }) => (
+  const TabButton = ({ iconName, label, isActive, onPress }) => (
     <TouchableOpacity
       style={styles.tabButton}
       onPress={onPress}
@@ -29,13 +29,16 @@ const TabNavigator = () => {
       <Ionicons 
         name={iconName} 
         size={24} 
-        color={isActive ? '#007AFF' : '#666'} 
+        color={isActive ? '#663399' : '#9966cc'} 
       />
+      <Text style={[styles.tabLabel, { color: isActive ? '#663399' : '#9966cc' }]}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
         {renderScreen()}
       </View>
@@ -43,21 +46,24 @@ const TabNavigator = () => {
       <View style={styles.tabBar}>
         <TabButton
           iconName="home"
+          label="Home"
           isActive={activeTab === 'Home'}
           onPress={() => setActiveTab('Home')}
         />
         <TabButton
           iconName="compass"
+          label="Explore"
           isActive={activeTab === 'Explore'}
           onPress={() => setActiveTab('Explore')}
         />
         <TabButton
           iconName="person"
+          label="Profile"
           isActive={activeTab === 'User'}
           onPress={() => setActiveTab('User')}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -71,16 +77,26 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    paddingVertical: 10,
-    paddingBottom: 60,
+    borderTopColor: '#e6e6fa',
+    paddingVertical: 8,
+    paddingBottom: 25,
+    shadowColor: '#663399',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 8,
   },
   tabButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 8,
+  },
+  tabLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 4,
   },
 });
 

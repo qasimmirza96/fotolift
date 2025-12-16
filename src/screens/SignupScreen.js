@@ -131,18 +131,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 40,
-    color: '#333',
+    color: '#663399',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#e6e6fa',
     padding: 15,
     marginBottom: 15,
     borderRadius: 8,
     fontSize: 16,
   },
   emailButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#663399',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: '#007AFF',
+    color: '#663399',
     fontSize: 16,
   },
   inputError: {
