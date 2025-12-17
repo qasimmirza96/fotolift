@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ImageBackground, ScrollView } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 const { height } = Dimensions.get('window');
@@ -25,6 +26,7 @@ const backgroundSources = [
 ];
 
 const HomeScreen = () => {
+  const insets = useSafeAreaInsets();
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Hero Section - 40% of screen height */}
       <View style={styles.heroSection}>
         <ImageBackground
@@ -92,7 +94,7 @@ const HomeScreen = () => {
         
       
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -103,19 +105,14 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     height: height * 0.45, // 45% of screen height
-    marginTop: -25, // Extend to top
   },
   heroBackground: {
     width: '100%',
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 25, // Account for status bar
   },
   overlay: {
-    // backgroundColor: 'rgba(102, 51, 153, 0.8)',
-    //black overlay
-    marginTop: 90,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     padding: 20,
     borderRadius: 10,

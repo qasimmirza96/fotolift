@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import ExploreScreen from '../screens/ExploreScreen';
 import UserScreen from '../screens/UserScreen';
 
 const TabNavigator = () => {
+  const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState('Home');
 
   const renderScreen = () => {
@@ -43,7 +45,7 @@ const TabNavigator = () => {
         {renderScreen()}
       </View>
       
-      <View style={styles.tabBar}>
+      <View style={[styles.tabBar, { paddingBottom: insets.bottom + 8 }]}>
         <TabButton
           iconName="home"
           label="Home"
@@ -81,7 +83,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e6e6fa',
     paddingVertical: 8,
-    paddingBottom: 25,
     shadowColor: '#663399',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,

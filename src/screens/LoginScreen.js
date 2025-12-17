@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import { login, setError } from '../store/slices/authSlice';
 
@@ -72,7 +73,7 @@ const LoginScreen = ({ onSwitchToSignup }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>FotoLift</Text>
       
       <TextInput
@@ -111,7 +112,7 @@ const LoginScreen = ({ onSwitchToSignup }) => {
       <TouchableOpacity style={styles.linkButton} onPress={onSwitchToSignup}>
         <Text style={styles.linkText}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
