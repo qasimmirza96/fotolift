@@ -1,99 +1,116 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ImageBackground, ScrollView } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, AppState } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { VideoView, useVideoPlayer } from 'expo-video';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { height } = Dimensions.get('window');
 
-// Core services data - minimalist
 const coreServices = [
-  { id: 1, title: 'Background Remover', icon: 'cut-outline' },
-  { id: 2, title: 'Image Enhancer', icon: 'sparkles-outline' },
-  { id: 3, title: 'Wrinkled to Ironed', icon: 'shirt-outline' },
-  { id: 4, title: 'Centralized Image', icon: 'crop-outline' },
-  { id: 5, title: 'AI Model Try-On', icon: 'person-outline' },
-  { id: 6, title: 'Try-On Gear', icon: 'glasses-outline' },
-  { id: 7, title: 'Image to Video', icon: 'videocam-outline' },
+  { id: 1, title: 'Background Remover', icon: 'cut' },
+  { id: 2, title: 'Image Enhancer', icon: 'sparkles' },
+  { id: 3, title: 'Wrinkled to Ironed', icon: 'shirt' },
+  { id: 4, title: 'Centralized Image', icon: 'crop' },
+  { id: 5, title: 'AI Model Try-On', icon: 'person' },
+  { id: 6, title: 'Try-On Gear', icon: 'glasses' },
+  { id: 7, title: 'Image to Video', icon: 'videocam' },
 ];
 
-// Multiple background sources (images and GIFs)
-const backgroundSources = [
-  { uri: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80' },
-  { uri: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80' },
-  { uri: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80' },
-  { uri: 'https://media.giphy.com/media/26BRrSvJUa0crqw4E/giphy.gif' },
-  { uri: 'https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif' },
+const videoSources = [
+  'https://pub-e8b5e18b4f264d6ba4fe500f8e6f0f6c.r2.dev/homeScreenVideos/318654_tiny.mp4',
+  'https://pub-e8b5e18b4f264d6ba4fe500f8e6f0f6c.r2.dev/homeScreenVideos/42967-434316750_small.mp4',
+  'https://pub-e8b5e18b4f264d6ba4fe500f8e6f0f6c.r2.dev/homeScreenVideos/214669_medium.mp4',
 ];
 
-const HomeScreen = () => {
-  const insets = useSafeAreaInsets();
-  const [currentBgIndex, setCurrentBgIndex] = useState(0);
+const HomeScreen = ({ navigation }) => {
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [appState, setAppState] = useState(AppState.currentState);
+  
+  const localPlayer = useVideoPlayer(videoSources[currentVideoIndex], (player) => {
+    player.loop = true;
+    player.muted = true;
+    player.play();
+  });
+
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState) => {
+      if (appState.match(/inactive|background/) && nextAppState === 'active') {
+        localPlayer.play();
+      } else if (nextAppState.match(/inactive|background/)) {
+        localPlayer.pause();
+      }
+      setAppState(nextAppState);
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => subscription?.remove();
+  }, [appState, localPlayer]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBgIndex((prevIndex) => 
-        (prevIndex + 1) % backgroundSources.length
-      );
-    }, 4000); // Change every 4 seconds
-
+      setCurrentVideoIndex((prev) => (prev + 1) % videoSources.length);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
   const handleStartJourney = () => {
     console.log('🚀 Start Journey pressed');
-    // Navigate to journey or next screen
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Hero Section - 40% of screen height */}
-      <View style={styles.heroSection}>
-        <ImageBackground
-          style={styles.heroBackground}
-          source={backgroundSources[currentBgIndex]}
-          resizeMode="cover"
-        >
-          {/* Overlay content */}
-          <View style={styles.overlay}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.heroSection}>
+          <View style={styles.videoWrapper}>
+            <VideoView player={localPlayer} style={styles.video} contentFit="cover" />
+            <LinearGradient colors={['transparent', 'rgba(0,0,0,0.7)']} style={styles.videoGradient} />
+          </View>
+          
+          <View style={styles.brandingOverlay}>
             <Text style={styles.heroTitle}>FotoLift</Text>
             <Text style={styles.heroSubtitle}>Elevate Your Photography</Text>
           </View>
-        </ImageBackground>
-      </View>
-      
-      {/* Content Section */}
-      <View style={styles.contentSection}>
-          <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>Welcome to FotoLift</Text>
-          <Text style={styles.infoText}>
-            Discover, capture, and share amazing moments with our photography platform.
-          </Text>
+          
+          <View style={styles.indicators}>
+            {videoSources.map((_, index) => (
+              <View key={index} style={[styles.indicator, index === currentVideoIndex && styles.activeIndicator]} />
+            ))}
+          </View>
         </View>
-        <TouchableOpacity style={styles.startButton} onPress={handleStartJourney}>
-          <Text style={styles.startButtonText}>Start Journey</Text>
-        </TouchableOpacity>
         
-        {/* Core Services Section */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.welcomeTitle}>Transform Your Images</Text>
+          <Text style={styles.welcomeText}>Professional AI-powered tools at your fingertips</Text>
+        </View>
+        
         <View style={styles.servicesSection}>
-          {/* <Text style={styles.servicesTitle}>Core AI Features</Text> */}
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.servicesScroll}
-          >
+          <Text style={styles.sectionTitle}>Our Services</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.servicesScroll}>
             {coreServices.map((service) => (
-              <TouchableOpacity key={service.id} style={styles.serviceCard}>
-                <View style={styles.serviceIconContainer}>
-                  <Ionicons name={service.icon} size={24} color="#663399" />
-                </View>
+              <TouchableOpacity 
+                key={service.id} 
+                style={styles.serviceCard}
+                onPress={() => service.id === 1 && navigation?.navigate('BackgroundRemover')}
+              >
+                <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.serviceIconContainer}>
+                  <Ionicons name={service.icon} size={28} color="#fff" />
+                </LinearGradient>
                 <Text style={styles.serviceTitle}>{service.title}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
         
-      
-      </View>
+        <View style={styles.ctaSection}>
+          <TouchableOpacity onPress={handleStartJourney}>
+            <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.startButton} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+              <Text style={styles.startButtonText}>Get Started</Text>
+              <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -101,119 +118,158 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
+  },
+  scrollView: {
+    flex: 1,
   },
   heroSection: {
-    height: height * 0.45, // 45% of screen height
+    height: height * 0.35,
+    position: 'relative',
+    overflow: 'hidden',
   },
-  heroBackground: {
+  videoWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  video: {
     width: '100%',
     height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  overlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
+  videoGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+  },
+  brandingOverlay: {
+    position: 'absolute',
+    bottom: 40,
+    left: 24,
   },
   heroTitle: {
-    fontSize: 36,
-    fontWeight: 'bold',
+    fontSize: 42,
+    fontWeight: '800',
     color: '#fff',
-    marginBottom: 8,
+    letterSpacing: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
   heroSubtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#fff',
-    opacity: 0.9,
+    marginTop: 8,
+    fontWeight: '400',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
-  contentSection: {
-    flex: 1,
-    padding: 10,
-    justifyContent: 'flex-start',
+  indicators: {
+    position: 'absolute',
+    bottom: 16,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
   },
-  startButton: {
-    backgroundColor: '#663399',
-    paddingVertical: 16,
-    paddingHorizontal: 40,
-    borderRadius: 35,
-    alignSelf: 'center',
-    marginTop: 20,
-    marginBottom: 30,
-    shadowColor: '#663399',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
-  startButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+  activeIndicator: {
+    backgroundColor: '#fff',
+    width: 24,
+  },
+  welcomeSection: {
+    padding: 24,
+    backgroundColor: '#fff',
+    marginTop: -20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  welcomeText: {
+    fontSize: 15,
+    color: '#666',
+    lineHeight: 22,
   },
   servicesSection: {
-    marginBottom: 30,
+    paddingVertical: 24,
+    backgroundColor: '#fff',
   },
-  servicesTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#663399',
-    marginBottom: 15,
-    textAlign: 'center',
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 16,
+    paddingHorizontal: 24,
   },
   servicesScroll: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    gap: 16,
   },
   serviceCard: {
     alignItems: 'center',
-    marginHorizontal: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    minWidth: 100,
-    borderWidth: 1,
-    borderColor: '#e6e6fa',
-    shadowColor: '#663399',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    width: 100,
   },
   serviceIconContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 8,
-    shadowColor: '#663399',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowColor: '#7c3aed',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   serviceTitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#663399',
+    color: '#333',
     textAlign: 'center',
     lineHeight: 16,
   },
-  infoSection: {
+  ctaSection: {
+    padding: 24,
+    backgroundColor: '#fff',
+    paddingBottom: 40,
+  },
+  startButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 30,
+    gap: 8,
+    shadowColor: '#7c3aed',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  infoTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#663399',
-    marginBottom: 12,
-  },
-  infoText: {
+  startButtonText: {
+    color: '#fff',
     fontSize: 16,
-    color: '#9966cc',
-    textAlign: 'center',
-    lineHeight: 24,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });
 

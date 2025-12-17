@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ImageBackground, Image, Dimensions, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ImageBackground, Image, Dimensions, StatusBar, Animated } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { logout } from '../store/slices/authSlice';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { height, width } = Dimensions.get('window');
 
@@ -10,6 +11,10 @@ const UserScreen = () => {
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
   const [activeTab, setActiveTab] = useState('projects');
+  const [showTopBar, setShowTopBar] = useState(false);
+  
+  const COVER_HEIGHT = height * 0.4;
+  const SCROLL_THRESHOLD = COVER_HEIGHT * 0.3;
 
   const handleLogout = () => {
     dispatch(logout());
@@ -65,10 +70,31 @@ const UserScreen = () => {
     ]
   };
 
+  const handleScroll = (event) => {
+    const scrollY = event.nativeEvent.contentOffset.y;
+    setShowTopBar(scrollY > SCROLL_THRESHOLD);
+  };
+
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      
+      {/* Top Bar - Shows on scroll */}
+      {showTopBar && (
+        <View style={styles.topBar}>
+          <Text style={styles.topBarTitle}>{userData.name}</Text>
+          <View style={styles.topBarActions}>
+            <TouchableOpacity style={styles.topBarButton}>
+              <Ionicons name="settings-outline" size={24} color="#333" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.topBarButton} onPress={handleLogout}>
+              <Ionicons name="log-out-outline" size={24} color="#ef4444" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+      
+      <ScrollView showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
         {/* Enhanced Cover Section */}
         <View style={styles.coverSection}>
           <ImageBackground
@@ -165,13 +191,14 @@ const UserScreen = () => {
               <Text style={styles.primaryButtonText}>Edit Profile</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.secondaryButton}>
+            {/* <TouchableOpacity style={styles.iconButton}>
               <Ionicons name="settings-outline" size={18} color="#8B5CF6" />
               <Text style={styles.secondaryButtonText}>Settings</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.secondaryButton }>
               <Ionicons name="share-outline" size={18} color="#8B5CF6" />
+                <Text style={styles.secondaryButtonText}>Share</Text>
             </TouchableOpacity>
           </View>
           
@@ -255,7 +282,7 @@ const UserScreen = () => {
           )}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -263,6 +290,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  topBarTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#333',
+  },
+  topBarActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  topBarButton: {
+    padding: 8,
   },
   coverSection: {
     height: height * 0.45,
@@ -284,7 +333,7 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingTop: 50,
+    paddingTop: 20,
     paddingHorizontal: 20,
   },
   headerButton: {
