@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ExploreScreen from '../screens/ExploreScreen';
 import UserScreen from '../screens/UserScreen';
 import BackgroundRemoverScreen from '../screens/BackgroundRemoverScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const TabNavigator = () => {
   const insets = useSafeAreaInsets();
@@ -22,6 +23,9 @@ const TabNavigator = () => {
     if (currentScreen === 'BackgroundRemover') {
       return <BackgroundRemoverScreen navigation={navigation} />;
     }
+    if (currentScreen === 'Settings') {
+      return <SettingsScreen navigation={navigation} />;
+    }
     
     switch (activeTab) {
       case 'Home':
@@ -29,7 +33,7 @@ const TabNavigator = () => {
       case 'Explore':
         return <ExploreScreen />;
       case 'User':
-        return <UserScreen />;
+        return <UserScreen navigation={navigation} />;
       default:
         return <HomeScreen navigation={navigation} />;
     }
@@ -48,7 +52,7 @@ const TabNavigator = () => {
         {renderScreen()}
       </View>
       
-      <View style={[styles.tabBar, { paddingBottom: insets.bottom + 8 }]}>
+      <View style={[styles.tabBar, { paddingBottom: insets.bottom }]}>
         <TabButton iconName="home" label="Home" isActive={activeTab === 'Home'} onPress={() => setActiveTab('Home')} />
         <TabButton iconName="compass" label="Explore" isActive={activeTab === 'Explore'} onPress={() => setActiveTab('Explore')} />
         
@@ -82,16 +86,17 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     borderTopWidth: 1,
     borderTopColor: '#f3f4f6',
-    paddingVertical: 8,
+    paddingTop: 8,
     paddingHorizontal: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 10,
+   
   },
   tabButton: {
     flex: 1,

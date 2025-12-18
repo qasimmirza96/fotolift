@@ -14,7 +14,7 @@ export default function App() {
   // console.log('📊 Store state on render:', );
   
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider >
       <Provider store={store}>
         <PlainNavigator />
         <StatusBar style="auto" />

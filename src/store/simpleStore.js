@@ -1,12 +1,23 @@
 import { configureStore, createSlice } from '@reduxjs/toolkit';
+import { LOCAL_IMAGES, IMAGES } from '../constants';
 
 console.log('🏪 SimpleStore: Creating minimal store...');
 
-// Simple auth slice without async thunks
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: null,
+    user: {
+      name: 'Alexandra Chen',
+      email: 'alexandra.chen@fotolift.com',
+      profileImage: IMAGES.defaultProfile,
+      coverImage: IMAGES.defaultCover,
+      bio: 'Professional photographer & visual storyteller. Capturing moments that matter.',
+      location: 'San Francisco, CA',
+      website: 'www.alexchen.photo',
+      joinDate: 'March 2023',
+      verified: true,
+      loginMethod: 'google',
+    },
     isAuthenticated: false,
     isLoading: false,
     error: null,
@@ -29,10 +40,17 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.error = null;
     },
+    updateProfile: (state, action) => {
+      console.log('✏️ Profile updated', action.payload);
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      } else {
+        state.user = action.payload;
+      }
+    },
   },
 });
 
-// Simple photos slice without async thunks
 const photosSlice = createSlice({
   name: 'photos',
   initialState: {

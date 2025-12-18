@@ -59,7 +59,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.heroSection}>
           <View style={styles.videoWrapper}>
@@ -118,7 +118,7 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
   },
   scrollView: {
     flex: 1,
@@ -184,10 +184,12 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
+     display:'none',
   },
   activeIndicator: {
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
     width: 24,
+    display:'none',
   },
   welcomeSection: {
     padding: 24,

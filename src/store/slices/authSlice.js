@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authAPI } from '../../services/apiMethods';
+import { LOCAL_IMAGES } from '../../constants';
 
 // Async thunks
 export const loginUser = createAsyncThunk(
@@ -35,7 +36,18 @@ export const registerUser = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: null,
+    user: {
+      name: 'Alexandra Chen',
+      email: 'alexandra.chen@fotolift.com',
+      profileImage:LOCAL_IMAGES.qasim,
+      coverImage: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=500&h=300&fit=crop',
+      bio: 'Professional photographer & visual storyteller. Capturing moments that matter.',
+      location: 'San Francisco, CA',
+      website: 'www.alexchen.photo',
+      joinDate: 'March 2023',
+      verified: true,
+      loginMethod: 'google',
+    },
     token: null,
     isLoading: false,
     error: null,
@@ -68,6 +80,14 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    updateProfile: (state, action) => {
+      console.log('✏️ Profile updated', action.payload);
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      } else {
+        state.user = action.payload;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -109,5 +129,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { signup, login, logout, setError, clearError } = authSlice.actions;
+export const { signup, login, logout, setError, clearError, updateProfile } = authSlice.actions;
 export default authSlice.reducer;

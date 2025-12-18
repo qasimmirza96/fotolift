@@ -1,190 +1,212 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { logout } from '../store/slices/authSlice';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useDispatch, useSelector } from 'react-redux';
+import { authActions } from '../store/simpleStore';
 
-const SettingsScreen = () => {
+const SettingsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
+  const [notifications, setNotifications] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  const [autoSave, setAutoSave] = useState(true);
 
   const handleLogout = () => {
-    dispatch(logout());
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', style: 'destructive', onPress: () => dispatch(authActions.logout()) }
+      ]
+    );
   };
 
-  const SettingItem = ({ icon, title, subtitle, onPress, showArrow = true, rightComponent }) => (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress}>
+  const SettingItem = ({ icon, title, subtitle, onPress, rightComponent, showBorder = true }) => (
+    <TouchableOpacity 
+      style={[styles.settingItem, !showBorder && styles.noBorder]} 
+      onPress={onPress}
+      disabled={!onPress}
+    >
       <View style={styles.settingLeft}>
         <View style={styles.iconContainer}>
-          <Ionicons name={icon} size={20} color="#8B5CF6" />
+          <Ionicons name={icon} size={22} color="#7c3aed" />
         </View>
-        <View style={styles.settingContent}>
+        <View style={styles.settingText}>
           <Text style={styles.settingTitle}>{title}</Text>
           {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
         </View>
       </View>
-      <View style={styles.settingRight}>
-        {rightComponent}
-        {showArrow && <Ionicons name="chevron-forward" size={16} color="#999" />}
-      </View>
+      {rightComponent || <Ionicons name="chevron-forward" size={20} color="#999" />}
     </TouchableOpacity>
   );
 
+  const SettingSection = ({ title, children }) => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.sectionContent}>
+        {children}
+      </View>
+    </View>
+  );
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation?.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Settings</Text>
-        <Text style={styles.headerSubtitle}>Manage your account and preferences</Text>
+        <View style={styles.placeholder} />
       </View>
 
-      {/* Account Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account</Text>
-        <View style={styles.sectionCard}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.profileCard}>
+          <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.profileGradient}>
+            <View style={styles.profileInfo}>
+              <View style={styles.avatarContainer}>
+                <Text style={styles.avatarText}>{user?.name?.charAt(0) || 'A'}</Text>
+              </View>
+              <View>
+                <Text style={styles.profileName}>{user?.name || 'User'}</Text>
+                <Text style={styles.profileEmail}>{user?.email || 'user@fotolift.com'}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.editProfileBtn}>
+              <Ionicons name="create-outline" size={20} color="#fff" />
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
+
+        <SettingSection title="Preferences">
           <SettingItem
-            icon="person-outline"
+            icon="notifications"
+            title="Notifications"
+            subtitle="Enable push notifications"
+            rightComponent={
+              <Switch
+                value={notifications}
+                onValueChange={setNotifications}
+                trackColor={{ false: '#e0e0e0', true: '#a855f7' }}
+                thumbColor={notifications ? '#7c3aed' : '#f4f3f4'}
+              />
+            }
+          />
+          {/* <SettingItem
+            icon="moon"
+            title="Dark Mode"
+            subtitle="Switch to dark theme"
+            rightComponent={
+              <Switch
+                value={darkMode}
+                onValueChange={setDarkMode}
+                trackColor={{ false: '#e0e0e0', true: '#a855f7' }}
+                thumbColor={darkMode ? '#7c3aed' : '#f4f3f4'}
+              />
+            }
+          /> */}
+          <SettingItem
+            icon="save"
+            title="Auto Save"
+            subtitle="Automatically save your work"
+            rightComponent={
+              <Switch
+                value={autoSave}
+                onValueChange={setAutoSave}
+                trackColor={{ false: '#e0e0e0', true: '#a855f7' }}
+                thumbColor={autoSave ? '#7c3aed' : '#f4f3f4'}
+              />
+            }
+            showBorder={false}
+          />
+        </SettingSection>
+
+        <SettingSection title="Account">
+          <SettingItem
+            icon="person"
             title="Edit Profile"
             subtitle="Update your personal information"
             onPress={() => console.log('Edit Profile')}
           />
           <SettingItem
-            icon="key-outline"
+            icon="lock-closed"
+            title="Privacy & Security"
+            subtitle="Manage your privacy settings"
+            onPress={() => console.log('Privacy')}
+          />
+          <SettingItem
+            icon="key"
             title="Change Password"
             subtitle="Update your password"
             onPress={() => console.log('Change Password')}
+            showBorder={false}
           />
-          <SettingItem
-            icon="shield-checkmark-outline"
-            title="Privacy & Security"
-            subtitle="Manage your privacy settings"
-            onPress={() => console.log('Privacy & Security')}
-          />
-        </View>
-      </View>
+        </SettingSection>
 
-      {/* Preferences Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Preferences</Text>
-        <View style={styles.sectionCard}>
+        <SettingSection title="Content">
           <SettingItem
-            icon="notifications-outline"
-            title="Notifications"
-            subtitle="Push notifications, email alerts"
-            onPress={() => console.log('Notifications')}
+            icon="cloud"
+            title="Storage"
+            subtitle="Manage your storage space"
+            onPress={() => console.log('Storage')}
           />
           <SettingItem
-            icon="moon-outline"
-            title="Dark Mode"
-            subtitle="Switch to dark theme"
-            showArrow={false}
-            rightComponent={<Switch value={false} onValueChange={() => {}} thumbColor="#8B5CF6" />}
-          />
-          <SettingItem
-            icon="language-outline"
-            title="Language"
-            subtitle="English"
-            onPress={() => console.log('Language')}
-          />
-          <SettingItem
-            icon="cloud-download-outline"
-            title="Auto Backup"
-            subtitle="Automatically backup your photos"
-            showArrow={false}
-            rightComponent={<Switch value={true} onValueChange={() => {}} thumbColor="#8B5CF6" />}
-          />
-        </View>
-      </View>
-
-      {/* Storage Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Storage & Data</Text>
-        <View style={styles.sectionCard}>
-          <SettingItem
-            icon="folder-outline"
-            title="Storage Usage"
-            subtitle="2.3 GB of 15 GB used"
-            onPress={() => console.log('Storage Usage')}
-          />
-          <SettingItem
-            icon="download-outline"
+            icon="download"
             title="Download Quality"
             subtitle="High quality"
-            onPress={() => console.log('Download Quality')}
+            onPress={() => console.log('Quality')}
           />
           <SettingItem
-            icon="trash-outline"
+            icon="trash"
             title="Clear Cache"
-            subtitle="Free up storage space"
-            onPress={() => console.log('Clear Cache')}
+            subtitle="Free up space"
+            onPress={() => Alert.alert('Cache Cleared', 'Your cache has been cleared successfully')}
+            showBorder={false}
           />
-        </View>
-      </View>
+        </SettingSection>
 
-      {/* Support Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Support</Text>
-        <View style={styles.sectionCard}>
+        <SettingSection title="Support">
           <SettingItem
-            icon="help-circle-outline"
+            icon="help-circle"
             title="Help Center"
             subtitle="Get help and support"
-            onPress={() => console.log('Help Center')}
+            onPress={() => console.log('Help')}
           />
           <SettingItem
-            icon="chatbubble-outline"
+            icon="chatbubble"
             title="Contact Us"
-            subtitle="Send feedback or report issues"
-            onPress={() => console.log('Contact Us')}
+            subtitle="Send us a message"
+            onPress={() => console.log('Contact')}
           />
           <SettingItem
-            icon="star-outline"
+            icon="star"
             title="Rate App"
-            subtitle="Rate FotoLift on app store"
-            onPress={() => console.log('Rate App')}
+            subtitle="Share your feedback"
+            onPress={() => console.log('Rate')}
           />
-        </View>
-      </View>
+          <SettingItem
+            icon="information-circle"
+            title="About"
+            subtitle="Version 1.0.0"
+            onPress={() => console.log('About')}
+            showBorder={false}
+          />
+        </SettingSection>
 
-      {/* About Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>About</Text>
-        <View style={styles.sectionCard}>
-          <SettingItem
-            icon="information-circle-outline"
-            title="App Version"
-            subtitle="1.0.0"
-            showArrow={false}
-          />
-          <SettingItem
-            icon="document-text-outline"
-            title="Terms of Service"
-            onPress={() => console.log('Terms of Service')}
-          />
-          <SettingItem
-            icon="shield-outline"
-            title="Privacy Policy"
-            onPress={() => console.log('Privacy Policy')}
-          />
-        </View>
-      </View>
-
-      {/* Logout Section */}
-      <View style={styles.section}>
-        <View style={styles.sectionCard}>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={20} color="#FF3B30" />
-            <Text style={styles.logoutText}>Logout</Text>
+        <View style={styles.logoutSection}>
+          <TouchableOpacity onPress={handleLogout}>
+            <LinearGradient colors={['#ef4444', '#dc2626']} style={styles.logoutButton}>
+              <Ionicons name="log-out-outline" size={22} color="#fff" />
+              <Text style={styles.logoutText}>Logout</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
-      </View>
 
-      {/* User Info Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Logged in as {user?.email}</Text>
-        <Text style={styles.footerSubtext}>FotoLift © 2024</Text>
-      </View>
-    </ScrollView>
+        <Text style={styles.footer}>FotoLift © 2024</Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -194,39 +216,102 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   header: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#8B5CF6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  backButton: {
+    padding: 8,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#333',
   },
-  headerSubtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
+  placeholder: {
+    width: 40,
+  },
+  profileCard: {
+    margin: 20,
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#7c3aed',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  profileGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  avatarContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  avatarText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  profileEmail: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  editProfileBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   section: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#999',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginLeft: 20,
     marginBottom: 12,
   },
-  sectionCard: {
+  sectionContent: {
     backgroundColor: '#fff',
-    borderRadius: 15,
+    marginHorizontal: 20,
+    borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 2,
   },
   settingItem: {
     flexDirection: 'row',
@@ -234,23 +319,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#f5f5f5',
+  },
+  noBorder: {
+    borderBottomWidth: 0,
   },
   settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+    gap: 12,
   },
   iconContainer: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: '#f3f4f6',
     alignItems: 'center',
-    marginRight: 15,
+    justifyContent: 'center',
   },
-  settingContent: {
+  settingText: {
     flex: 1,
   },
   settingTitle: {
@@ -260,39 +348,37 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   settingSubtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 13,
+    color: '#999',
   },
-  settingRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  logoutSection: {
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 24,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    paddingVertical: 16,
+    borderRadius: 30,
+    gap: 8,
+    shadowColor: '#ef4444',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   logoutText: {
+    color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FF3B30',
-    marginLeft: 10,
+    fontWeight: '700',
   },
   footer: {
-    padding: 20,
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 40,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
-  },
-  footerSubtext: {
-    fontSize: 12,
+    textAlign: 'center',
+    fontSize: 13,
     color: '#999',
+    marginBottom: 32,
   },
 });
 
