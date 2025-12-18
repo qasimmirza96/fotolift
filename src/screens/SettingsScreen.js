@@ -74,9 +74,9 @@ const SettingsScreen = ({ navigation }) => {
                 <Text style={styles.profileEmail}>{user?.email || 'user@fotolift.com'}</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.editProfileBtn}>
+            {/* <TouchableOpacity style={styles.editProfileBtn}>
               <Ionicons name="create-outline" size={20} color="#fff" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </LinearGradient>
         </View>
 

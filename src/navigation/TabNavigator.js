@@ -6,7 +6,23 @@ import { LinearGradient } from 'expo-linear-gradient';
 import HomeScreen from '../screens/HomeScreen';
 import ExploreScreen from '../screens/ExploreScreen';
 import UserScreen from '../screens/UserScreen';
-import BackgroundRemoverScreen from '../screens/BackgroundRemoverScreen';
+import BGRSetupScreen from '../screens/BGRSetupScreen';
+import BGRSingleImageScreen from '../screens/BGRSingleImageScreen';
+import BGRFolderScreen from '../screens/BGRFolderScreen';
+import BGRResultScreen from '../screens/BGRResultScreen';
+import ImageEnhancerScreen from '../screens/ImageEnhancerScreen';
+import IEResultScreen from '../screens/IEResultScreen';
+import WRSetupScreen from '../screens/WRSetupScreen';
+import WRSingleImageScreen from '../screens/WRSingleImageScreen';
+import WRFolderScreen from '../screens/WRFolderScreen';
+import WRResultScreen from '../screens/WRResultScreen';
+import CISetupScreen from '../screens/CISetupScreen';
+import CISingleImageScreen from '../screens/CISingleImageScreen';
+import CIFolderScreen from '../screens/CIFolderScreen';
+import CIResultScreen from '../screens/CIResultScreen';
+import AIModelTryOnScreen from '../screens/AIModelTryOnScreen';
+import AITryOnResultScreen from '../screens/AITryOnResultScreen';
+import TryOnGearScreen from '../screens/TryOnGearScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
 const TabNavigator = () => {
@@ -15,27 +31,143 @@ const TabNavigator = () => {
   const [currentScreen, setCurrentScreen] = useState('Home');
   
   const navigation = {
-    navigate: (screen) => setCurrentScreen(screen),
-    goBack: () => setCurrentScreen('Home'),
+    navigate: (screen) => {
+      console.log('Navigating to:', screen);
+      setCurrentScreen(screen);
+    },
+    goBack: () => {
+      console.log('Going back from:', currentScreen);
+      if (currentScreen === 'WRSingleImage' || currentScreen === 'WRFolder') {
+        setCurrentScreen('WRSetup');
+      } else if (currentScreen === 'WRResult') {
+        setCurrentScreen('Home');
+      } else {
+        setCurrentScreen('Home');
+      }
+    },
+  };
+
+  const handleServiceSelect = (serviceId) => {
+    if (serviceId === 1) {
+      setCurrentScreen('BGRSetup');
+    } else if (serviceId === 2) {
+      setCurrentScreen('ImageEnhancer');
+    } else if (serviceId === 3) {
+      setCurrentScreen('WRSetup');
+    } else if (serviceId === 4) {
+      setCurrentScreen('CISetup');
+    } else if (serviceId === 5) {
+      setCurrentScreen('AIModelTryOn');
+    } else if (serviceId === 6) {
+      setCurrentScreen('TryOnGear');
+    }
+  };
+
+  const handleBGRContinue = (mode) => {
+    if (mode === 'single') {
+      setCurrentScreen('BGRSingle');
+    } else if (mode === 'folder') {
+      setCurrentScreen('BGRFolder');
+    }
+  };
+
+  const handleBGRProcess = () => {
+    console.log('✅ BGR Processing complete');
+    setCurrentScreen('BGRResult');
+  };
+
+  const handleBGRDownload = () => {
+    console.log('📥 Download initiated');
+  };
+
+  const handleBGRHome = () => {
+    setCurrentScreen('Home');
+    setActiveTab('Home');
+  };
+
+  const handleIEDownload = () => {
+    console.log('📥 IE Download initiated');
+  };
+
+  const handleIEHome = () => {
+    setCurrentScreen('Home');
+    setActiveTab('Home');
+  };
+
+  const handleWRHome = () => {
+    setCurrentScreen('Home');
+    setActiveTab('Home');
   };
 
   const renderScreen = () => {
-    if (currentScreen === 'BackgroundRemover') {
-      return <BackgroundRemoverScreen navigation={navigation} />;
+    if (currentScreen === 'BGRSetup') {
+      return <BGRSetupScreen onContinue={handleBGRContinue} onBack={() => setCurrentScreen('Home')} />;
     }
+    if (currentScreen === 'BGRSingle') {
+      return <BGRSingleImageScreen onProcess={handleBGRProcess} onBack={() => setCurrentScreen('BGRSetup')} />;
+    }
+    if (currentScreen === 'BGRFolder') {
+      return <BGRFolderScreen onProcess={handleBGRProcess} onBack={() => setCurrentScreen('BGRSetup')} />;
+    }
+    if (currentScreen === 'BGRResult') {
+      return <BGRResultScreen onDownload={handleBGRDownload} onHome={handleBGRHome} />;
+    }
+    if (currentScreen === 'ImageEnhancer') {
+      return <ImageEnhancerScreen 
+        onBack={() => setCurrentScreen('Home')} 
+        onSuccess={() => setCurrentScreen('IEResult')}
+      />;
+    }
+    if (currentScreen === 'IEResult') {
+      return <IEResultScreen onDownload={handleIEDownload} onHome={handleIEHome} />;
+    }
+    if (currentScreen === 'WRSetup') {
+      return <WRSetupScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'WRSingleImage') {
+      return <WRSingleImageScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'WRFolder') {
+      return <WRFolderScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'WRResult') {
+      return <WRResultScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'CISetup') {
+      return <CISetupScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'CISingleImage') {
+      return <CISingleImageScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'CIFolder') {
+      return <CIFolderScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'CIResult') {
+      return <CIResultScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'AIModelTryOn') {
+      return <AIModelTryOnScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'AITryOnResult') {
+      return <AITryOnResultScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'TryOnGear') {
+      return <TryOnGearScreen navigation={navigation} />;
+    }
+    
     if (currentScreen === 'Settings') {
       return <SettingsScreen navigation={navigation} />;
     }
     
     switch (activeTab) {
       case 'Home':
-        return <HomeScreen navigation={navigation} />;
+        return <HomeScreen onServiceSelect={handleServiceSelect} />;
       case 'Explore':
         return <ExploreScreen />;
       case 'User':
-        return <UserScreen navigation={navigation} />;
+        return <UserScreen navigation={navigation} onNavigate={(screen) => setCurrentScreen(screen)} />;
       default:
-        return <HomeScreen navigation={navigation} />;
+        return <HomeScreen onServiceSelect={handleServiceSelect} />;
     }
   };
 
@@ -46,13 +178,16 @@ const TabNavigator = () => {
     </TouchableOpacity>
   );
 
+  const shouldShowTabBar = !['BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult', 'ImageEnhancer', 'IEResult', 'WRSetup', 'WRSingleImage', 'WRFolder', 'WRResult', 'CISetup', 'CISingleImage', 'CIFolder', 'CIResult', 'AIModelTryOn', 'AITryOnResult', 'TryOnGear', 'Settings'].includes(currentScreen);
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         {renderScreen()}
       </View>
       
-      <View style={[styles.tabBar, { paddingBottom: insets.bottom }]}>
+      {shouldShowTabBar && (
+        <View style={[styles.tabBar, { paddingBottom: insets.bottom }]}>
         <TabButton iconName="home" label="Home" isActive={activeTab === 'Home'} onPress={() => setActiveTab('Home')} />
         <TabButton iconName="compass" label="Explore" isActive={activeTab === 'Explore'} onPress={() => setActiveTab('Explore')} />
         
@@ -70,8 +205,8 @@ const TabNavigator = () => {
         {/* <TabButton iconName="camera" label="Camera" onPress={() => console.log('Camera pressed')} /> */}
             {/* <View style={styles.spacer} /> */}
         <TabButton iconName="person" label="Profile" isActive={activeTab === 'User'} onPress={() => setActiveTab('User')} />
-      </View>
-      
+        </View>
+      )}
     </View>
   );
 };

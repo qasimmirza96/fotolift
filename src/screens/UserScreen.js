@@ -11,7 +11,7 @@ import { LOCAL_IMAGES } from '../constants';
 
 const { height, width } = Dimensions.get('window');
 
-const UserScreen = ({ navigation }) => {
+const UserScreen = ({ navigation, onNavigate }) => {
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
   const [activeTab, setActiveTab] = useState('projects');
@@ -165,7 +165,7 @@ const UserScreen = ({ navigation }) => {
         <View style={styles.topBar}>
           <Text style={styles.topBarTitle}>{userData.name}</Text>
           <View style={styles.topBarActions}>
-            <TouchableOpacity style={styles.topBarButton} onPress={() => navigation?.navigate('Settings')}>
+            <TouchableOpacity style={styles.topBarButton} onPress={() => onNavigate && onNavigate('Settings')}>
               <Ionicons name="settings-outline" size={24} color="#333" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.topBarButton} onPress={handleLogout}>
@@ -180,7 +180,7 @@ const UserScreen = ({ navigation }) => {
           <ImageBackground source={{ uri: userData.coverImage }} style={styles.coverImage} resizeMode="cover">
             <View style={styles.gradientOverlay} />
             <View style={styles.headerActions}>
-              <TouchableOpacity style={styles.headerButton} onPress={() => navigation?.navigate('Settings')}>
+              <TouchableOpacity style={styles.headerButton} onPress={() => onNavigate && onNavigate('Settings')}>
                 <Ionicons name="settings-outline" size={24} color="#fff" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.headerButton} onPress={handleShare}>

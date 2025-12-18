@@ -1,5 +1,11 @@
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 import { LOCAL_IMAGES, IMAGES } from '../constants';
+import bgrReducer from './slices/bgrSlice';
+import imageEnhancerReducer from './slices/imageEnhancerSlice';
+import wrinkleRemoverReducer from './slices/wrinkleRemoverSlice';
+import centralizedImageReducer from './slices/centralizedImageSlice';
+import aiModelTryOnReducer from './slices/aiModelTryOnSlice';
+import tryOnGearReducer from './slices/tryOnGearSlice';
 
 console.log('🏪 SimpleStore: Creating minimal store...');
 
@@ -78,6 +84,12 @@ const store = configureStore({
   reducer: {
     auth: authSlice.reducer,
     photos: photosSlice.reducer,
+    bgr: bgrReducer,
+    imageEnhancer: imageEnhancerReducer,
+    wrinkleRemover: wrinkleRemoverReducer,
+    centralizedImage: centralizedImageReducer,
+    aiModelTryOn: aiModelTryOnReducer,
+    tryOnGear: tryOnGearReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

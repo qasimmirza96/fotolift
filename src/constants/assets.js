@@ -57,7 +57,7 @@ export const APP_CONFIG = {
   name: 'FotoLift',
   tagline: 'Elevate Your Photography',
   version: '1.0.0',
-  copyright: 'FotoLift © 2024',
+  copyright: 'FotoLift © 2025',
 };
 
 // Services

@@ -19,13 +19,25 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.qasimmirza.fotolift"
+      "package": "com.qasimmirza.fotolift",
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-video"
+      "expo-video",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow FotoLift to save enhanced images.",
+          "savePhotosPermission": "Allow FotoLift to save enhanced images to your gallery."
+        }
+      ]
     ],
     "extra": {
       "eas": {

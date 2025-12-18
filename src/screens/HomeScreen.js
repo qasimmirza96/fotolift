@@ -23,7 +23,7 @@ const videoSources = [
   'https://pub-e8b5e18b4f264d6ba4fe500f8e6f0f6c.r2.dev/homeScreenVideos/214669_medium.mp4',
 ];
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, onServiceSelect }) => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [appState, setAppState] = useState(AppState.currentState);
   
@@ -91,7 +91,7 @@ const HomeScreen = ({ navigation }) => {
               <TouchableOpacity 
                 key={service.id} 
                 style={styles.serviceCard}
-                onPress={() => service.id === 1 && navigation?.navigate('BackgroundRemover')}
+                onPress={() => onServiceSelect && onServiceSelect(service.id)}
               >
                 <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.serviceIconContainer}>
                   <Ionicons name={service.icon} size={28} color="#fff" />
