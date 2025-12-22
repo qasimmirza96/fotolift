@@ -15,13 +15,13 @@ const PlainNavigator = () => {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
   
-  if (!isAuthenticated) {
-    return showSignup ? (
-      <SignupScreen onSwitchToLogin={() => setShowSignup(false)} />
-    ) : (
-      <LoginScreen onSwitchToSignup={() => setShowSignup(true)} />
-    );
-  }
+  // if (!isAuthenticated) {
+  //   return showSignup ? (
+  //     <SignupScreen onSwitchToLogin={() => setShowSignup(false)} />
+  //   ) : (
+  //     <LoginScreen onSwitchToSignup={() => setShowSignup(true)} />
+  //   );
+  // }
   
   return (
     <View style={styles.container}>
@@ -38,3 +38,6 @@ const styles = StyleSheet.create({
 });
 
 export default PlainNavigator;
+
+// initializing => config => executing => rendering 
+// Storage Access Framework (SAF)

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
+import { pickFolder } from '../utils/folderPicker';
 import { setFolder, setError } from '../store/slices/bgrSlice';
 
 const BGRFolderScreen = ({ onProcess, onBack }) => {
@@ -10,21 +11,39 @@ const BGRFolderScreen = ({ onProcess, onBack }) => {
   const { folder } = useSelector(state => state.bgr);
   const [folderError, setFolderError] = useState('');
 
-  const handleFolderUpload = () => {
-    // TODO: Implement folder picker when API is ready
-    // For now, simulate folder selection
-    const mockFolder = {
-      name: 'My Images',
-      fileCount: 15,
-      path: '/mock/path/to/folder',
-      files: Array(15).fill(null).map((_, i) => ({
-        name: `image-${i + 1}.jpg`,
-        type: 'image/jpeg',
-      })),
-    };
-    dispatch(setFolder(mockFolder));
-    setFolderError('');
-    console.log('📁 Folder selected (mock):', mockFolder.name, mockFolder.fileCount, 'files');
+  // Log Redux state changes
+  useEffect(() => {
+    console.log('📦 Redux State Updated - BGR Folder:');
+    console.log('  - Folder exists:', !!folder);
+    if (folder) {
+      console.log('  - Folder name:', folder.name);
+      console.log('  - Image count:', folder.fileCount);
+      console.log('  - Files array length:', folder.files?.length || 0);
+    }
+  }, [folder]);
+
+  const handleFolderUpload = async () => {
+    try {
+      const folderData = await pickFolder();
+      
+      if (!folderData) {
+        console.log('❌ Folder selection cancelled');
+        return;
+      }
+
+      if (folderData.fileCount === 0) {
+        Alert.alert('No Images', 'No image files found in the selected folder');
+        return;
+      }
+      
+      dispatch(setFolder(folderData));
+      setFolderError('');
+      
+      console.log('💾 Redux State - BGR Folder:', JSON.stringify(folderData, null, 2));
+    } catch (err) {
+      console.error('❌ Error picking folder:', err);
+      Alert.alert('Error', 'Failed to select folder: ' + err.message);
+    }
   };
 
   const handleRemoveFolder = () => {
@@ -37,9 +56,12 @@ const BGRFolderScreen = ({ onProcess, onBack }) => {
       return;
     }
 
-    console.log('🚀 Processing folder...');
-    console.log('Folder:', folder.name);
-    console.log('File count:', folder.fileCount);
+    console.log('🚀 ===== PROCESSING FOLDER =====');
+    console.log('📂 Folder name:', folder.name);
+    console.log('📊 Total images to process:', folder.fileCount);
+    console.log('🖼️ Image files:', folder.files.length);
+    console.log('💾 Full Redux State:', folder);
+    console.log('================================');
     
     // TODO: API call placeholder
     // const result = await bgrAPI.processFolderImages({ folder });

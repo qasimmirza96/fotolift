@@ -37,7 +37,8 @@
           "photosPermission": "Allow FotoLift to save enhanced images.",
           "savePhotosPermission": "Allow FotoLift to save enhanced images to your gallery."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "eas": {

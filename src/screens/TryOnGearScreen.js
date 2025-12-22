@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
-import * as ImagePicker from 'expo-image-picker';
+import { pickFolder, pickImage } from '../utils/folderPicker';
 import {
   setSelectedModel,
   setAccessoryImage,
@@ -52,39 +52,35 @@ const TryOnGearScreen = ({ navigation }) => {
   };
 
   const handleAccessoryPick = async (type) => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      dispatch(setAccessoryImage({ type, image: result.assets[0] }));
+    try {
+      const result = await pickImage();
+      if (result) {
+        dispatch(setAccessoryImage({ type, image: result }));
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Failed to pick image');
     }
   };
 
   const handleFolderPick = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: true,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets.length > 0) {
-      dispatch(setFolderImages(result.assets));
+    try {
+      const folderData = await pickFolder();
+      if (folderData) {
+        dispatch(setFolderImages(folderData.files));
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Failed to pick folder images');
     }
   };
 
   const handleMultiFolderPick = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: true,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets.length > 0) {
-      // Group images logically (in real app, this would be folder-based)
-      dispatch(setMultiFolderImages([result.assets]));
+    try {
+      const folderData = await pickFolder();
+      if (folderData) {
+        dispatch(setMultiFolderImages([folderData.files]));
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Failed to pick folders');
     }
   };
 
