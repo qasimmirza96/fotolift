@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import * as ImagePicker from 'expo-image-picker';
+import { pickFolder, pickImage } from '../utils/folderPicker';
 import {
   setTileSize,
   setTilePadding,
@@ -33,53 +33,37 @@ const ImageEnhancerScreen = ({ onBack, onSuccess }) => {
 
   // Handle single image selection
   const handleSingleImageUpload = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Please grant storage permission to upload images.',
-        [{ text: 'OK' }]
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      const image = {
-        uri: result.assets[0].uri,
-        name: result.assets[0].fileName || 'image.jpg',
-        type: result.assets[0].type || 'image/jpeg',
-      };
-      dispatch(setSingleImage(image));
+    try {
+      const image = await pickImage();
+      if (image) {
+        dispatch(setSingleImage(image));
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to pick image');
     }
   };
 
   // Handle folder selection
-  const handleFolderUpload = () => {
-    // TODO: Implement actual folder picker when available
-    // For now, simulate folder selection
-    const mockFolder = {
-      name: 'My Images',
-      fileCount: 12,
-      path: '/mock/path/to/folder',
-    };
-    dispatch(setFolder(mockFolder));
-    console.log('📁 Folder selected (mock):', mockFolder.name);
+  const handleFolderUpload = async () => {
+    try {
+      const folderData = await pickFolder();
+      if (folderData) {
+        dispatch(setFolder(folderData));
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to pick folder');
+    }
   };
 
   // Handle remove single image
   const handleRemoveSingleImage = () => {
+    console.log('🗑️ Removing single image');
     dispatch(setSingleImage(null));
   };
 
   // Handle remove folder
   const handleRemoveFolder = () => {
+    console.log('🗑️ Removing folder');
     dispatch(setFolder(null));
   };
 
@@ -252,9 +236,9 @@ const ImageEnhancerScreen = ({ onBack, onSuccess }) => {
               {status === 'processing' 
                 ? 'Processing...' 
                 : mode === 'single' 
-                  ? 'Enhance Single Image' 
+                  ? 'Enhance Image' 
                   : mode === 'folder' 
-                    ? 'Enhance Folder Images'
+                    ? 'Enhance Folder'
                     : 'Select Image or Folder'}
             </Text>
           </TouchableOpacity>
@@ -461,10 +445,12 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   actionSection: {
+    flexDirection: 'row',
     gap: 12,
     marginBottom: 20,
   },
   actionButton: {
+    flex: 1,
     backgroundColor: '#663399',
     paddingVertical: 16,
     borderRadius: 30,
@@ -479,10 +465,11 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   homeButton: {
+    flex: 1,
     paddingVertical: 16,
     borderRadius: 30,
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#663399',
   },
   homeButtonText: {

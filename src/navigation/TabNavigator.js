@@ -12,9 +12,7 @@ import BGRFolderScreen from '../screens/BGRFolderScreen';
 import BGRResultScreen from '../screens/BGRResultScreen';
 import ImageEnhancerScreen from '../screens/ImageEnhancerScreen';
 import IEResultScreen from '../screens/IEResultScreen';
-import WRSetupScreen from '../screens/WRSetupScreen';
-import WRSingleImageScreen from '../screens/WRSingleImageScreen';
-import WRFolderScreen from '../screens/WRFolderScreen';
+import WRUnifiedScreen from '../screens/WRUnifiedScreen';
 import WRResultScreen from '../screens/WRResultScreen';
 import CISetupScreen from '../screens/CISetupScreen';
 import CISingleImageScreen from '../screens/CISingleImageScreen';
@@ -81,8 +79,19 @@ const TabNavigator = () => {
   };
 
   const handleBGRHome = () => {
+    console.log('🏠 handleBGRHome called in TabNavigator');
+    console.log('🔄 Setting currentScreen to: Home');
+    console.log('🔄 Setting activeTab to: Home');
     setCurrentScreen('Home');
     setActiveTab('Home');
+    console.log('✅ Navigation complete');
+  };
+
+  const handleBGRRepeat = () => {
+    console.log('🔁 handleBGRRepeat called in TabNavigator');
+    console.log('🔄 Setting currentScreen to: BGRSetup');
+    setCurrentScreen('BGRSetup');
+    console.log('✅ Repeat navigation complete');
   };
 
   const handleIEDownload = () => {
@@ -92,6 +101,10 @@ const TabNavigator = () => {
   const handleIEHome = () => {
     setCurrentScreen('Home');
     setActiveTab('Home');
+  };
+
+  const handleIERepeat = () => {
+    setCurrentScreen('ImageEnhancer');
   };
 
   const handleWRHome = () => {
@@ -110,7 +123,7 @@ const TabNavigator = () => {
       return <BGRFolderScreen onProcess={handleBGRProcess} onBack={() => setCurrentScreen('BGRSetup')} />;
     }
     if (currentScreen === 'BGRResult') {
-      return <BGRResultScreen onDownload={handleBGRDownload} onHome={handleBGRHome} />;
+      return <BGRResultScreen onDownload={handleBGRDownload} onHome={handleBGRHome} onRepeat={handleBGRRepeat} />;
     }
     if (currentScreen === 'ImageEnhancer') {
       return <ImageEnhancerScreen 
@@ -119,16 +132,10 @@ const TabNavigator = () => {
       />;
     }
     if (currentScreen === 'IEResult') {
-      return <IEResultScreen onDownload={handleIEDownload} onHome={handleIEHome} />;
+      return <IEResultScreen onDownload={handleIEDownload} onHome={handleIEHome} onRepeat={handleIERepeat} />;
     }
     if (currentScreen === 'WRSetup') {
-      return <WRSetupScreen navigation={navigation} />;
-    }
-    if (currentScreen === 'WRSingleImage') {
-      return <WRSingleImageScreen navigation={navigation} />;
-    }
-    if (currentScreen === 'WRFolder') {
-      return <WRFolderScreen navigation={navigation} />;
+      return <WRUnifiedScreen navigation={navigation} />;
     }
     if (currentScreen === 'WRResult') {
       return <WRResultScreen navigation={navigation} />;
@@ -178,7 +185,7 @@ const TabNavigator = () => {
     </TouchableOpacity>
   );
 
-  const shouldShowTabBar = !['BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult', 'ImageEnhancer', 'IEResult', 'WRSetup', 'WRSingleImage', 'WRFolder', 'WRResult', 'CISetup', 'CISingleImage', 'CIFolder', 'CIResult', 'AIModelTryOn', 'AITryOnResult', 'TryOnGear', 'Settings'].includes(currentScreen);
+  const shouldShowTabBar = !['BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult', 'ImageEnhancer', 'IEResult', 'WRSetup', 'WRResult', 'CISetup', 'CISingleImage', 'CIFolder', 'CIResult', 'AIModelTryOn', 'AITryOnResult', 'TryOnGear', 'Settings'].includes(currentScreen);
 
   return (
     <View style={styles.container}>

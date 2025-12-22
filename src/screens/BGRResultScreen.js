@@ -2,27 +2,32 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useSelector } from 'react-redux';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSelector, useDispatch } from 'react-redux';
 import { downloadImage, downloadImagesAsZip } from '../utils/downloadUtils';
+import { resetBgr } from '../store/slices/bgrSlice';
 
-const BGRResultScreen = ({ onDownload, onHome }) => {
+const BGRResultScreen = ({ onDownload, onHome, onRepeat }) => {
+  const dispatch = useDispatch();
   const { mainImage, backgroundImage, folder, mode } = useSelector(state => state.bgr);
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
+    console.log('👆 Download button pressed');
     console.log('📥 Downloading processed image/folder...');
     setIsDownloading(true);
     
     try {
       if (mode === 'single' && mainImage) {
-        // Download single processed image
+        console.log('🖼️ Downloading single image:', mainImage.name);
         await downloadImage(mainImage.uri, `BGR_${mainImage.name}`);
       } else if (mode === 'folder' && folder) {
-        // Download folder as ZIP
-        const mockImageUris = Array(folder.fileCount).fill(mainImage?.uri || 'https://via.placeholder.com/500');
-        await downloadImagesAsZip(mockImageUris, `BGR_${folder.name}.zip`);
+        console.log('📁 Downloading folder as ZIP:', folder.name);
+        const imageUris = folder.files.map(file => file.uri);
+        await downloadImagesAsZip(imageUris, `BGR_${folder.name}.zip`);
       }
-      onDownload && onDownload();
+      
+      console.log('✅ Download completed successfully');
     } catch (error) {
       console.error('❌ Download error:', error);
     } finally {
@@ -30,10 +35,36 @@ const BGRResultScreen = ({ onDownload, onHome }) => {
     }
   };
 
+  const handleRepeat = () => {
+    console.log('🔁 Repeat button pressed');
+    console.log('🧹 Clearing BGR state...');
+    dispatch(resetBgr());
+    console.log('🔄 Restarting BGR process');
+    if (onRepeat) {
+      onRepeat();
+    } else {
+      console.log('⚠️ onRepeat callback not provided!');
+    }
+  };
+
+  const handleHome = () => {
+    console.log('👆 Home button pressed');
+    console.log('🧹 Clearing BGR state...');
+    dispatch(resetBgr());
+    console.log('🏠 Navigating to home screen');
+    if (onHome) {
+      onHome();
+    } else {
+      console.log('⚠️ onHome callback not provided!');
+    }
+  };
+
+  
+console.log('folder', folder);
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onHome} style={styles.backButton}>
+        <TouchableOpacity onPress={handleHome} style={styles.backButton}>
           <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Processing Complete</Text>
@@ -45,7 +76,7 @@ const BGRResultScreen = ({ onDownload, onHome }) => {
           <Ionicons name="checkmark-circle" size={80} color="#663399" />
         </View>
 
-        <Text style={styles.successTitle}>Background Removed Successfully!</Text>
+        <Text style={styles.successTitle}> Background Removed Successfully!</Text>
         <Text style={styles.successText}>
           {mode === 'single' 
             ? 'Your image has been processed and is ready to download.'
@@ -70,9 +101,10 @@ const BGRResultScreen = ({ onDownload, onHome }) => {
 
       <View style={styles.footer}>
         <TouchableOpacity 
-          style={[styles.downloadButton, isDownloading && styles.downloadButtonDisabled]} 
+          style={styles.downloadButton}
           onPress={handleDownload}
           disabled={isDownloading}
+          activeOpacity={0.7}
         >
           {isDownloading ? (
             <ActivityIndicator size="small" color="#fff" />
@@ -80,11 +112,17 @@ const BGRResultScreen = ({ onDownload, onHome }) => {
             <Ionicons name="download-outline" size={20} color="#fff" />
           )}
           <Text style={styles.downloadButtonText}>
-            {isDownloading ? 'Downloading...' : mode === 'folder' ? 'Download ZIP' : 'Download Image'}
+            {isDownloading ? 'Downloading...' : mode === 'folder' ? 'Download' : 'Download'}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.homeButton} onPress={onHome}>
-          <Text style={styles.homeButtonText}>Back to Home</Text>
+
+        <TouchableOpacity 
+          style={styles.repeatButton}
+          onPress={handleRepeat}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="repeat-outline" size={20} color="#663399" />
+          <Text style={styles.repeatButtonText}>Process Again</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -171,40 +209,55 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   footer: {
+    flexDirection: 'row',
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#e6e6fa',
+    gap: 12,
   },
   downloadButton: {
+    flex: 1,
     flexDirection: 'row',
     backgroundColor: '#663399',
     paddingVertical: 16,
-    borderRadius: 30,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
     gap: 8,
   },
-  downloadButtonDisabled: {
-    backgroundColor: '#9966cc',
-    opacity: 0.7,
+  homeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#663399',
   },
   downloadButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
-  homeButton: {
+  repeatButton: {
+    flex: 1,
+    flexDirection: 'row',
     paddingVertical: 16,
-    borderRadius: 30,
+    borderRadius: 12,
     alignItems: 'center',
-    borderWidth: 1,
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#fff',
+    borderWidth: 2,
     borderColor: '#663399',
   },
-  homeButtonText: {
+  repeatButtonText: {
     color: '#663399',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
 

@@ -31,7 +31,7 @@ export const pickFolder = async () => {
     const folderData = {
       name: result.name || 'Selected Folder',
       path: result.uri,
-      fileCount: result.fileCount,
+      fileCount: result.files.length,
       files: result.files.map(file => ({
         name: file.name,
         uri: file.uri,

@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { downloadImage, downloadImagesAsZip } from '../utils/downloadUtils';
+import { resetImageEnhancerState } from '../store/slices/imageEnhancerSlice';
+import ResultFooter from '../components/ResultFooter';
 
-const IEResultScreen = ({ onDownload, onHome }) => {
+const IEResultScreen = ({ onDownload, onHome, onRepeat }) => {
+  const dispatch = useDispatch();
   const { singleImage, folder, mode } = useSelector(state => state.imageEnhancer);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -15,15 +18,12 @@ const IEResultScreen = ({ onDownload, onHome }) => {
     
     try {
       if (mode === 'single' && singleImage) {
-        // Download single image
         await downloadImage(singleImage.uri, `Enhanced_${singleImage.name}`);
       } else if (mode === 'folder' && folder) {
-        // Download folder as ZIP (or multiple images)
-        // For now, simulate with mock URIs
-        const mockImageUris = Array(folder.fileCount).fill(singleImage?.uri || 'https://via.placeholder.com/500');
-        await downloadImagesAsZip(mockImageUris, `Enhanced_${folder.name}.zip`);
+        const imageUris = folder.files.map(file => file.uri);
+        await downloadImagesAsZip(imageUris, `Enhanced_${folder.name}.zip`);
       }
-      onDownload && onDownload();
+      console.log('✅ Download completed successfully');
     } catch (error) {
       console.error('❌ Download error:', error);
     } finally {
@@ -31,10 +31,16 @@ const IEResultScreen = ({ onDownload, onHome }) => {
     }
   };
 
+  const handleRepeat = () => {
+    console.log('🔁 Repeat process');
+    dispatch(resetImageEnhancerState());
+    onRepeat && onRepeat();
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onHome} style={styles.backButton}>
+        <TouchableOpacity onPress={handleRepeat} style={styles.backButton}>
           <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Enhancement Complete</Text>
@@ -69,25 +75,13 @@ const IEResultScreen = ({ onDownload, onHome }) => {
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={[styles.downloadButton, isDownloading && styles.downloadButtonDisabled]} 
-          onPress={handleDownload}
-          disabled={isDownloading}
-        >
-          {isDownloading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Ionicons name="download-outline" size={20} color="#fff" />
-          )}
-          <Text style={styles.downloadButtonText}>
-            {isDownloading ? 'Downloading...' : mode === 'folder' ? 'Download ZIP' : 'Download Image'}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.homeButton} onPress={onHome}>
-          <Text style={styles.homeButtonText}>Back to Home</Text>
-        </TouchableOpacity>
-      </View>
+      <ResultFooter 
+        isDownloading={isDownloading}
+        onDownload={handleDownload}
+        onRepeat={handleRepeat}
+        downloadText="Download Image"
+        mode={mode}
+      />
     </SafeAreaView>
   );
 };
@@ -174,42 +168,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 5,
-  },
-  footer: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
-  },
-  downloadButton: {
-    flexDirection: 'row',
-    backgroundColor: '#663399',
-    paddingVertical: 16,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-    gap: 8,
-  },
-  downloadButtonDisabled: {
-    backgroundColor: '#9966cc',
-    opacity: 0.7,
-  },
-  downloadButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  homeButton: {
-    paddingVertical: 16,
-    borderRadius: 30,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#663399',
-  },
-  homeButtonText: {
-    color: '#663399',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
 

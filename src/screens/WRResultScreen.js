@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { resetWrinkleRemover } from '../store/slices/wrinkleRemoverSlice';
 import { downloadImage, downloadImagesAsZip } from '../utils/downloadUtils';
+import ResultFooter from '../components/ResultFooter';
 
 const WRResultScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -34,16 +35,14 @@ const WRResultScreen = ({ navigation }) => {
     }
   };
 
-  const handleHome = () => {
-    console.log('Resetting wrinkle remover state');
+  const handleRepeat = () => {
     dispatch(resetWrinkleRemover());
-    navigation.navigate('Home');
+    navigation.navigate('WRSetup');
   };
 
-  const handleDownloadComplete = async () => {
-    await handleDownload();
-    console.log('Download complete, resetting state');
+  const handleHome = () => {
     dispatch(resetWrinkleRemover());
+    navigation.navigate('Home');
   };
 
   return (
@@ -83,25 +82,13 @@ const WRResultScreen = ({ navigation }) => {
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.downloadButton} 
-          onPress={handleDownload}
-          disabled={isDownloading}
-        >
-          {isDownloading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Ionicons name="download-outline" size={20} color="#fff" />
-          )}
-          <Text style={styles.downloadButtonText}>
-            {isDownloading ? 'Downloading...' : mode === 'folder' ? 'Download All' : 'Download Image'}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.homeButton} onPress={handleHome}>
-          <Text style={styles.homeButtonText}>Back to Home</Text>
-        </TouchableOpacity>
-      </View>
+      <ResultFooter 
+        isDownloading={isDownloading}
+        onDownload={handleDownload}
+        onRepeat={handleRepeat}
+        downloadText="Download Image"
+        mode={mode}
+      />
     </SafeAreaView>
   );
 };
@@ -181,42 +168,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
     marginTop: 12,
-  },
-  footer: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
-  },
-  downloadButton: {
-    flexDirection: 'row',
-    backgroundColor: '#663399',
-    paddingVertical: 16,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-    gap: 8,
-  },
-  downloadButtonDisabled: {
-    backgroundColor: '#9966cc',
-    opacity: 0.7,
-  },
-  downloadButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  homeButton: {
-    paddingVertical: 16,
-    borderRadius: 30,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#663399',
-  },
-  homeButtonText: {
-    color: '#663399',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
 
