@@ -21,7 +21,7 @@ const { width } = Dimensions.get('window');
 
 // Predefined models (static for now)
 const MODELS = [
-  { id: 1, name: 'Model 1', uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400' },
+  { id: 1, name: 'Model 1', uri: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YmVhdXRpZnVsJTIwd29tYW58ZW58MHx8MHx8fDA%3D' },
   { id: 2, name: 'Model 2', uri: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400' },
   { id: 3, name: 'Model 3', uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400' },
   { id: 4, name: 'Model 4', uri: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400' },
@@ -135,7 +135,7 @@ const TryOnGearScreen = ({ navigation }) => {
 
           {/* Model Selection */}
           <View style={styles.subsection}>
-            <Text style={styles.subsectionTitle}>Select from Available Models</Text>
+            <Text style={styles.subsectionTitle}>Select from Available  Models</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modelSlider}>
               {MODELS.map((model, index) => (
                 <TouchableOpacity
