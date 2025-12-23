@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector, useDispatch } from 'react-redux';
 import { resetCentralizedImage } from '../store/slices/centralizedImageSlice';
 import { downloadImage, downloadImagesAsZip } from '../utils/downloadUtils';
+import ResultFooter from '../components/ResultFooter';
 
 const CIResultScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -14,21 +15,32 @@ const CIResultScreen = ({ navigation }) => {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
-    console.log('📥 Downloading centralized image/folder...');
+    console.log('📥 CI: Downloading centralized image/folder...');
+    console.log('📊 CI: Mode:', mode);
     setIsDownloading(true);
     
     try {
       if (mode === 'single' && singleImage) {
+        console.log('🖼️ CI: Downloading single image');
         await downloadImage(singleImage.uri, `Centralized_${singleImage.name}`);
       } else if (mode === 'folder' && folder) {
-        const imageUris = folder.images.map(img => img.uri);
+        console.log('📁 CI: Downloading folder as ZIP');
+        console.log('📊 CI: Folder files count:', folder.files?.length || folder.fileCount);
+        const imageUris = folder.files ? folder.files.map(file => file.uri) : [];
+        console.log('📊 CI: Image URIs:', imageUris.length);
         await downloadImagesAsZip(imageUris, `Centralized_${folder.name}.zip`);
       }
+      console.log('✅ CI: Download completed');
     } catch (error) {
-      console.error('❌ Download error:', error);
+      console.error('❌ CI: Download error:', error);
     } finally {
       setIsDownloading(false);
     }
+  };
+
+  const handleRepeat = () => {
+    dispatch(resetCentralizedImage());
+    navigation.navigate('CISetup');
   };
 
   const handleHome = () => {
@@ -78,27 +90,13 @@ const CIResultScreen = ({ navigation }) => {
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.downloadButton} 
-          onPress={handleDownload}
-          disabled={isDownloading}
-        >
-          <LinearGradient colors={['#667eea', '#764ba2']} style={styles.downloadGradient}>
-            {isDownloading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Ionicons name="download" size={20} color="#fff" />
-            )}
-            <Text style={styles.downloadButtonText}>
-              {isDownloading ? 'Downloading...' : mode === 'folder' ? 'Download All' : 'Download Image'}
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.homeButton} onPress={handleHome}>
-          <Text style={styles.homeButtonText}>Back to Home</Text>
-        </TouchableOpacity>
-      </View>
+      <ResultFooter 
+        isDownloading={isDownloading}
+        onDownload={handleDownload}
+        onRepeat={handleRepeat}
+        downloadText="Download Image"
+        mode={mode}
+      />
     </SafeAreaView>
   );
 };
@@ -200,39 +198,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#000',
-  },
-  footer: {
-    padding: 20,
-  },
-  downloadButton: {
-    borderRadius: 30,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-  downloadGradient: {
-    flexDirection: 'row',
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  downloadButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  homeButton: {
-    paddingVertical: 16,
-    borderRadius: 30,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#667eea',
-  },
-  homeButtonText: {
-    color: '#667eea',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
 

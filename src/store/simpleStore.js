@@ -5,6 +5,7 @@ import imageEnhancerReducer from './slices/imageEnhancerSlice';
 import wrinkleRemoverReducer from './slices/wrinkleRemoverSlice';
 import centralizedImageReducer from './slices/centralizedImageSlice';
 import aiModelTryOnReducer from './slices/aiModelTryOnSlice';
+import imageToVideoReducer from './slices/imageToVideoSlice';
 import tryOnGearReducer from './slices/tryOnGearSlice';
 
 console.log('🏪 SimpleStore: Creating minimal store...');
@@ -89,6 +90,7 @@ const store = configureStore({
     wrinkleRemover: wrinkleRemoverReducer,
     centralizedImage: centralizedImageReducer,
     aiModelTryOn: aiModelTryOnReducer,
+    imageToVideo: imageToVideoReducer,
     tryOnGear: tryOnGearReducer,
   },
   middleware: (getDefaultMiddleware) =>

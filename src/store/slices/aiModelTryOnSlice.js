@@ -2,9 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 const initialState = {
   clothImage: null,
+  clothFolder: null,
   modelImage: null,
-  clothImages: [],
-  mode: 'single', // 'single' | 'bulk'
+  mode: 'single', // 'single' | 'folder'
   status: 'idle', // 'idle' | 'ready' | 'processing' | 'success' | 'error'
   error: null,
   result: null,
@@ -14,28 +14,8 @@ const initialState = {
 // TODO: Implement actual API call when backend is ready
 export const generateTryOnResult = createAsyncThunk(
   'aiModelTryOn/generateResult',
-  async ({ clothImage, modelImage, clothImages, mode }, { rejectWithValue }) => {
+  async ({ clothImage, clothFolder, modelImage, mode }, { rejectWithValue }) => {
     try {
-      // API call will be implemented here
-      // const formData = new FormData();
-      // if (mode === 'single') {
-      //   formData.append('cloth', clothImage);
-      // } else {
-      //   clothImages.forEach((img, index) => {
-      //     formData.append(`cloth_${index}`, img);
-      //   });
-      // }
-      // formData.append('model', modelImage);
-      // formData.append('mode', mode);
-      
-      // const response = await fetch('API_ENDPOINT', {
-      //   method: 'POST',
-      //   body: formData,
-      // });
-      // const data = await response.json();
-      // return data;
-
-      // Simulate API call
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({ success: true, resultUrl: 'mock_result_url' });
@@ -53,19 +33,19 @@ const aiModelTryOnSlice = createSlice({
   reducers: {
     setClothImage: (state, action) => {
       state.clothImage = action.payload;
+      state.clothFolder = null;
       state.mode = 'single';
-      state.clothImages = [];
+      state.status = state.modelImage ? 'ready' : 'idle';
+    },
+    setClothFolder: (state, action) => {
+      state.clothFolder = action.payload;
+      state.clothImage = null;
+      state.mode = 'folder';
       state.status = state.modelImage ? 'ready' : 'idle';
     },
     setModelImage: (state, action) => {
       state.modelImage = action.payload;
-      state.status = (state.clothImage || state.clothImages.length > 0) ? 'ready' : 'idle';
-    },
-    setClothImages: (state, action) => {
-      state.clothImages = action.payload;
-      state.mode = 'bulk';
-      state.clothImage = null;
-      state.status = state.modelImage ? 'ready' : 'idle';
+      state.status = (state.clothImage || state.clothFolder) ? 'ready' : 'idle';
     },
     setMode: (state, action) => {
       state.mode = action.payload;
@@ -91,8 +71,8 @@ const aiModelTryOnSlice = createSlice({
 
 export const {
   setClothImage,
+  setClothFolder,
   setModelImage,
-  setClothImages,
   setMode,
   resetTryOnState,
 } = aiModelTryOnSlice.actions;

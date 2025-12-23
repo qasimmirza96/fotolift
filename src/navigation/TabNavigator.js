@@ -14,12 +14,12 @@ import ImageEnhancerScreen from '../screens/ImageEnhancerScreen';
 import IEResultScreen from '../screens/IEResultScreen';
 import WRUnifiedScreen from '../screens/WRUnifiedScreen';
 import WRResultScreen from '../screens/WRResultScreen';
-import CISetupScreen from '../screens/CISetupScreen';
-import CISingleImageScreen from '../screens/CISingleImageScreen';
-import CIFolderScreen from '../screens/CIFolderScreen';
+import CIUnifiedScreen from '../screens/CIUnifiedScreen';
 import CIResultScreen from '../screens/CIResultScreen';
 import AIModelTryOnScreen from '../screens/AIModelTryOnScreen';
 import AITryOnResultScreen from '../screens/AITryOnResultScreen';
+import ImageToVideoScreen from '../screens/ImageToVideoScreen';
+import ImageToVideoResultScreen from '../screens/ImageToVideoResultScreen';
 import TryOnGearScreen from '../screens/TryOnGearScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
@@ -46,6 +46,7 @@ const TabNavigator = () => {
   };
 
   const handleServiceSelect = (serviceId) => {
+    console.log(`🎯 TabNavigator: Service ${serviceId} selected`);
     if (serviceId === 1) {
       setCurrentScreen('BGRSetup');
     } else if (serviceId === 2) {
@@ -58,6 +59,9 @@ const TabNavigator = () => {
       setCurrentScreen('AIModelTryOn');
     } else if (serviceId === 6) {
       setCurrentScreen('TryOnGear');
+    } else if (serviceId === 7) {
+      console.log('🎥 TabNavigator: Navigating to ImageToVideo');
+      setCurrentScreen('ImageToVideo');
     }
   };
 
@@ -141,13 +145,7 @@ const TabNavigator = () => {
       return <WRResultScreen navigation={navigation} />;
     }
     if (currentScreen === 'CISetup') {
-      return <CISetupScreen navigation={navigation} />;
-    }
-    if (currentScreen === 'CISingleImage') {
-      return <CISingleImageScreen navigation={navigation} />;
-    }
-    if (currentScreen === 'CIFolder') {
-      return <CIFolderScreen navigation={navigation} />;
+      return <CIUnifiedScreen navigation={navigation} />;
     }
     if (currentScreen === 'CIResult') {
       return <CIResultScreen navigation={navigation} />;
@@ -160,6 +158,12 @@ const TabNavigator = () => {
     }
     if (currentScreen === 'TryOnGear') {
       return <TryOnGearScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'ImageToVideo') {
+      return <ImageToVideoScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'ImageToVideoResult') {
+      return <ImageToVideoResultScreen navigation={navigation} />;
     }
     
     if (currentScreen === 'Settings') {
@@ -185,7 +189,7 @@ const TabNavigator = () => {
     </TouchableOpacity>
   );
 
-  const shouldShowTabBar = !['BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult', 'ImageEnhancer', 'IEResult', 'WRSetup', 'WRResult', 'CISetup', 'CISingleImage', 'CIFolder', 'CIResult', 'AIModelTryOn', 'AITryOnResult', 'TryOnGear', 'Settings'].includes(currentScreen);
+  const shouldShowTabBar = !['BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult', 'ImageEnhancer', 'IEResult', 'WRSetup', 'WRResult', 'CISetup', 'CIResult', 'AIModelTryOn', 'AITryOnResult', 'TryOnGear', 'ImageToVideo', 'ImageToVideoResult', 'Settings'].includes(currentScreen);
 
   return (
     <View style={styles.container}>

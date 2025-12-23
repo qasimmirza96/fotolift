@@ -3,98 +3,136 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as ImagePicker from 'expo-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
-import { setClothImage, setModelImage, setClothImages, resetTryOnState, generateTryOnResult } from '../store/slices/aiModelTryOnSlice';
+import { setClothImage, setModelImage, setClothFolder, resetTryOnState, generateTryOnResult } from '../store/slices/aiModelTryOnSlice';
+import { pickImage, pickFolder as pickFolderUtil } from '../utils/folderPicker';
+
+// Predefined model images
+const MODELS = [
+  { id: 1, uri: 'https://via.placeholder.com/300x400/7c3aed/fff?text=Model+1', name: 'Model 1' },
+  { id: 2, uri: 'https://via.placeholder.com/300x400/a855f7/fff?text=Model+2', name: 'Model 2' },
+  { id: 3, uri: 'https://via.placeholder.com/300x400/9333ea/fff?text=Model+3', name: 'Model 3' },
+  { id: 4, uri: 'https://via.placeholder.com/300x400/8b5cf6/fff?text=Model+4', name: 'Model 4' },
+];
 
 const AIModelTryOnScreen = ({ navigation }) => {
+  console.log('🎬 AIModelTryOn: Component rendered');
   const dispatch = useDispatch();
   const { status } = useSelector(state => state.aiModelTryOn);
   
+  const [clothMode, setClothMode] = useState(null); // 'single' | 'folder'
+  const [modelMode, setModelMode] = useState(null); // 'slider' | 'upload'
   const [clothImage, setLocalClothImage] = useState(null);
-  const [modelImage, setLocalModelImage] = useState(null);
-  const [clothImages, setLocalClothImages] = useState([]);
+  const [clothFolder, setLocalClothFolder] = useState(null);
+  const [selectedModel, setSelectedModel] = useState(null);
+  const [uploadedModel, setUploadedModel] = useState(null);
 
-  const pickClothImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 1,
-    });
+  const handleSelectSliderModel = (model) => {
+    console.log('✅ AI: Slider model selected:', model.name);
+    setSelectedModel(model);
+    setUploadedModel(null);
+    setModelMode('slider');
+    dispatch(setModelImage(model));
+  };
 
-    if (!result.canceled) {
-      const image = {
-        uri: result.assets[0].uri,
-        name: result.assets[0].fileName || `Cloth_${Date.now()}.jpg`,
-      };
-      setLocalClothImage(image);
-      setLocalClothImages([]);
-      dispatch(setClothImage(image));
+  const handlePickClothImage = async () => {
+    console.log('📸 AI: Cloth image picker opened');
+    try {
+      const image = await pickImage();
+      if (image) {
+        console.log('✅ AI: Cloth image selected:', image.name);
+        setLocalClothImage(image);
+        setLocalClothFolder(null);
+        setClothMode('single');
+        dispatch(setClothImage(image));
+      }
+    } catch (error) {
+      console.error('❌ AI: Error picking cloth image:', error);
+      Alert.alert('Error', error.message || 'Failed to pick image');
     }
   };
 
-  const pickModelImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const image = {
-        uri: result.assets[0].uri,
-        name: result.assets[0].fileName || `Model_${Date.now()}.jpg`,
-      };
-      setLocalModelImage(image);
-      dispatch(setModelImage(image));
+  const handlePickClothFolder = async () => {
+    console.log('📁 AI: Cloth folder picker opened');
+    try {
+      const folderData = await pickFolderUtil();
+      if (folderData) {
+        console.log('✅ AI: Cloth folder selected:', folderData.name);
+        console.log('📊 AI: Folder file count:', folderData.fileCount);
+        
+        setLocalClothFolder(folderData);
+        setLocalClothImage(null);
+        setClothMode('folder');
+        dispatch(setClothFolder(folderData));
+      }
+    } catch (error) {
+      console.error('❌ AI: Error picking folder:', error);
+      Alert.alert('Error', error.message || 'Failed to pick folder');
     }
   };
 
-  const pickClothFolder = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      allowsMultipleSelection: true,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets.length > 0) {
-      const images = result.assets.map((asset, index) => ({
-        uri: asset.uri,
-        name: asset.fileName || `Cloth_${index}.jpg`,
-      }));
-      setLocalClothImages(images);
-      setLocalClothImage(null);
-      dispatch(setClothImages(images));
+  const handlePickModelImage = async () => {
+    console.log('📸 AI: Model image picker opened');
+    try {
+      const image = await pickImage();
+      if (image) {
+        console.log('✅ AI: Model image selected:', image.name);
+        setUploadedModel(image);
+        setSelectedModel(null);
+        setModelMode('upload');
+        dispatch(setModelImage(image));
+      }
+    } catch (error) {
+      console.error('❌ AI: Error picking model image:', error);
+      Alert.alert('Error', error.message || 'Failed to pick image');
     }
+  };
+
+  const handleReset = () => {
+    console.log('🔄 AI: Reset button pressed');
+    setClothMode(null);
+    setModelMode(null);
+    setLocalClothImage(null);
+    setLocalClothFolder(null);
+    setSelectedModel(null);
+    setUploadedModel(null);
+    dispatch(resetTryOnState());
+    console.log('✅ AI: Reset complete');
   };
 
   const handleGenerate = async () => {
-    if (!modelImage) {
-      Alert.alert('Missing Model', 'Please select a model image.');
+    console.log('🚀 AI: Generate button pressed');
+    
+    if (!selectedModel && !uploadedModel) {
+      Alert.alert('Missing Model', 'Please select or upload a model image.');
       return;
     }
 
-    if (!clothImage && clothImages.length === 0) {
-      Alert.alert('Missing Cloth', 'Please select cloth image(s).');
+    if (!clothImage && !clothFolder) {
+      Alert.alert('Missing Cloth', 'Please select cloth image or folder.');
       return;
     }
+
+    console.log('📊 AI: Cloth mode:', clothMode);
+    console.log('📊 AI: Model mode:', modelMode);
 
     try {
       await dispatch(generateTryOnResult({
         clothImage,
-        modelImage,
-        clothImages,
-        mode: clothImages.length > 0 ? 'bulk' : 'single',
+        clothFolder,
+        modelImage: selectedModel || uploadedModel,
+        mode: clothMode,
       })).unwrap();
 
+      console.log('✅ AI: Generation complete, navigating to result');
       navigation.navigate('AITryOnResult');
     } catch (error) {
+      console.error('❌ AI: Generation error:', error);
       Alert.alert('Error', 'Failed to process. Please try again.');
     }
   };
 
-  const isReady = modelImage && (clothImage || clothImages.length > 0);
+  const isReady = (selectedModel || uploadedModel) && (clothImage || clothFolder);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -103,94 +141,125 @@ const AIModelTryOnScreen = ({ navigation }) => {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.title}>AI Model Try-On</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
+          <Ionicons name="refresh" size={24} color="#fff" />
+        </TouchableOpacity>
       </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.heroSection}>
           <Text style={styles.heroTitle}>Virtual Try-On</Text>
           <Text style={styles.heroSubtitle}>
-            See how clothes look on AI models. Upload garment and model images.
+            See how clothes look on models. Select model and upload garment.
           </Text>
         </View>
 
-        {/* Cloth Image Section */}
+        {/* Model Selection Slider */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cloth Image</Text>
-          {clothImage ? (
-            <View style={styles.imagePreview}>
-              <Image source={{ uri: clothImage.uri }} style={styles.previewImage} />
-              <TouchableOpacity style={styles.changeButton} onPress={pickClothImage}>
-                <Ionicons name="refresh" size={18} color="#7c3aed" />
-                <Text style={styles.changeButtonText}>Change</Text>
+          <Text style={styles.sectionTitle}>Select Model</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modelSlider}>
+            {MODELS.map((model) => (
+              <TouchableOpacity
+                key={model.id}
+                style={[
+                  styles.modelCard,
+                  selectedModel?.id === model.id && styles.modelCardSelected,
+                ]}
+                onPress={() => handleSelectSliderModel(model)}
+              >
+                <Image source={{ uri: model.uri }} style={styles.modelImage} />
+                {selectedModel?.id === model.id && (
+                  <View style={styles.selectedBadge}>
+                    <Ionicons name="checkmark-circle" size={24} color="#7c3aed" />
+                  </View>
+                )}
+                <Text style={styles.modelName}>{model.name}</Text>
               </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity style={styles.uploadCard} onPress={pickClothImage}>
-              <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.uploadIcon}>
-                <Ionicons name="shirt" size={32} color="#fff" />
-              </LinearGradient>
-              <Text style={styles.uploadText}>Select Cloth Image</Text>
-            </TouchableOpacity>
-          )}
+            ))}
+          </ScrollView>
         </View>
 
-        {/* Model Image Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            Model Image <Text style={styles.required}>*</Text>
-          </Text>
-          {modelImage ? (
-            <View style={styles.imagePreview}>
-              <Image source={{ uri: modelImage.uri }} style={styles.previewImage} />
-              <TouchableOpacity style={styles.changeButton} onPress={pickModelImage}>
-                <Ionicons name="refresh" size={18} color="#7c3aed" />
-                <Text style={styles.changeButtonText}>Change</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity style={styles.uploadCard} onPress={pickModelImage}>
-              <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.uploadIcon}>
-                <Ionicons name="person" size={32} color="#fff" />
-              </LinearGradient>
-              <Text style={styles.uploadText}>Select Model Image</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Divider */}
+        {/* OR Divider */}
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>OR</Text>
           <View style={styles.dividerLine} />
         </View>
 
-        {/* Multiple Cloth Images */}
+        {/* Upload Model */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Multiple Cloth Images</Text>
-          {clothImages.length > 0 ? (
-            <View style={styles.multiplePreview}>
-              <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.countBadge}>
-                <Ionicons name="images" size={20} color="#fff" />
-                <Text style={styles.countText}>{clothImages.length} images</Text>
-              </LinearGradient>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
-                {clothImages.slice(0, 5).map((img, index) => (
-                  <Image key={index} source={{ uri: img.uri }} style={styles.thumbImage} />
-                ))}
-              </ScrollView>
-              <TouchableOpacity style={styles.changeButton} onPress={pickClothFolder}>
-                <Ionicons name="refresh" size={18} color="#7c3aed" />
-                <Text style={styles.changeButtonText}>Change</Text>
+          <Text style={styles.sectionTitle}>Upload Model Image</Text>
+          {uploadedModel ? (
+            <View style={styles.imagePreview}>
+              <Image source={{ uri: uploadedModel.uri }} style={styles.previewImage} />
+              <TouchableOpacity onPress={() => {
+                setUploadedModel(null);
+                setModelMode(null);
+              }} style={styles.removeIcon}>
+                <Ionicons name="close-circle" size={32} color="#FF3B30" />
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity style={styles.uploadCard} onPress={pickClothFolder}>
+            <TouchableOpacity style={styles.uploadCard} onPress={handlePickModelImage}>
               <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.uploadIcon}>
-                <Ionicons name="images" size={32} color="#fff" />
+                <Ionicons name="person" size={32} color="#fff" />
               </LinearGradient>
-              <Text style={styles.uploadText}>Select Multiple Images</Text>
+              <Text style={styles.uploadText}>Upload Model</Text>
             </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Cloth Selection */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Cloth Selection</Text>
+          <View style={styles.clothOptions}>
+            <TouchableOpacity style={styles.clothOption} onPress={handlePickClothImage}>
+              <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.clothIcon}>
+                <Ionicons name="shirt" size={24} color="#fff" />
+              </LinearGradient>
+              <Text style={styles.clothOptionText}>Single Image</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.clothOption} onPress={handlePickClothFolder}>
+              <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.clothIcon}>
+                <Ionicons name="folder" size={24} color="#fff" />
+              </LinearGradient>
+              <Text style={styles.clothOptionText}>Folder</Text>
+            </TouchableOpacity>
+          </View>
+
+          {clothImage && (
+            <View style={styles.selectedCloth}>
+              <Image source={{ uri: clothImage.uri }} style={styles.clothPreview} />
+              <View style={styles.clothInfo}>
+                <Text style={styles.clothLabel}>Single Cloth</Text>
+                <Text style={styles.clothName}>{clothImage.name}</Text>
+              </View>
+              <TouchableOpacity onPress={() => {
+                setLocalClothImage(null);
+                setClothMode(null);
+              }}>
+                <Ionicons name="close-circle" size={24} color="#FF3B30" />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {clothFolder && (
+            <View style={styles.selectedCloth}>
+              <View style={styles.folderIconWrapper}>
+                <Ionicons name="folder" size={40} color="#7c3aed" />
+              </View>
+              <View style={styles.clothInfo}>
+                <Text style={styles.clothLabel}>{clothFolder.name}</Text>
+                <Text style={styles.clothName}>{clothFolder.fileCount} images</Text>
+              </View>
+              <TouchableOpacity onPress={() => {
+                setLocalClothFolder(null);
+                setClothMode(null);
+              }}>
+                <Ionicons name="close-circle" size={24} color="#FF3B30" />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </ScrollView>
@@ -240,8 +309,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
-  placeholder: {
-    width: 34,
+  resetButton: {
+    padding: 5,
   },
   content: {
     flex: 1,
@@ -257,9 +326,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   heroSubtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#666',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   section: {
     padding: 20,
@@ -267,22 +336,80 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     color: '#000',
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  required: {
-    color: '#ef4444',
+  modelSlider: {
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+  },
+  modelCard: {
+    width: 120,
+    marginRight: 12,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  modelCardSelected: {
+    borderColor: '#7c3aed',
+  },
+  modelCardDisabled: {
+    opacity: 0.4,
+  },
+  modelImage: {
+    width: '100%',
+    height: 160,
+    backgroundColor: '#f0f0f0',
+  },
+  selectedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+  },
+  modelName: {
+    padding: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000',
+    textAlign: 'center',
+    backgroundColor: '#f9f9f9',
+  },
+  restrictionText: {
+    marginTop: 12,
+    fontSize: 13,
+    color: '#ff6b6b',
+    fontStyle: 'italic',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginVertical: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e5e5e5',
+  },
+  dividerText: {
+    marginHorizontal: 12,
+    fontSize: 14,
+    color: '#999',
+    fontWeight: '600',
   },
   uploadCard: {
     alignItems: 'center',
     padding: 32,
-    backgroundColor: '#fafafa',
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#7c3aed',
+    borderColor: '#e5e5e5',
     borderStyle: 'dashed',
+    backgroundColor: '#fafafa',
   },
   uploadIcon: {
     width: 64,
@@ -293,88 +420,103 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   uploadText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#666',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
   },
   imagePreview: {
-    gap: 12,
+    position: 'relative',
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   previewImage: {
     width: '100%',
-    height: 200,
-    borderRadius: 12,
-    backgroundColor: '#f5f5f5',
+    height: 300,
+    backgroundColor: '#f0f0f0',
   },
-  changeButton: {
+  removeIcon: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+  },
+  clothOptions: {
     flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  clothOption: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 20,
+    borderRadius: 12,
+    backgroundColor: '#fafafa',
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+  },
+  clothIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 8,
+    marginBottom: 8,
+  },
+  clothOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000',
+  },
+  selectedCloth: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#f9f9f9',
     borderWidth: 1,
     borderColor: '#7c3aed',
   },
-  changeButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#7c3aed',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 20,
-    marginVertical: 12,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e5e5e5',
-  },
-  dividerText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#999',
-  },
-  multiplePreview: {
-    gap: 12,
-  },
-  countBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  countText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  imageScroll: {
-    flexDirection: 'row',
-  },
-  thumbImage: {
-    width: 80,
-    height: 80,
+  clothPreview: {
+    width: 60,
+    height: 60,
     borderRadius: 8,
-    marginRight: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f0f0f0',
+  },
+  folderIconWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    backgroundColor: '#f0f4ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  clothInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  clothLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000',
+  },
+  clothName: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 2,
   },
   footer: {
     padding: 20,
     backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e5e5',
   },
   generateButton: {
     borderRadius: 30,
     overflow: 'hidden',
   },
   generateButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.6,
   },
   generateGradient: {
     flexDirection: 'row',

@@ -24,6 +24,7 @@ const videoSources = [
 ];
 
 const HomeScreen = ({ navigation, onServiceSelect }) => {
+  console.log('🏠 HomeScreen: Component rendered');
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [appState, setAppState] = useState(AppState.currentState);
   
@@ -48,6 +49,7 @@ const HomeScreen = ({ navigation, onServiceSelect }) => {
   }, [appState, localPlayer]);
 
   useEffect(() => {
+    console.log('🎥 HomeScreen: Video index changed to:', currentVideoIndex);
     const interval = setInterval(() => {
       setCurrentVideoIndex((prev) => (prev + 1) % videoSources.length);
     }, 10000);
@@ -55,7 +57,7 @@ const HomeScreen = ({ navigation, onServiceSelect }) => {
   }, []);
 
   const handleStartJourney = () => {
-    console.log('🚀 Start Journey pressed');
+    console.log('🚀 HomeScreen: Start Journey pressed');
   };
 
   return (
@@ -91,7 +93,16 @@ const HomeScreen = ({ navigation, onServiceSelect }) => {
               <TouchableOpacity 
                 key={service.id} 
                 style={styles.serviceCard}
-                onPress={() => onServiceSelect && onServiceSelect(service.id)}
+                onPress={() => {
+                  console.log(`👆 HomeScreen: Service pressed - ${service.title} (ID: ${service.id})`);
+                  console.log('📞 HomeScreen: Calling onServiceSelect with ID:', service.id);
+                  if (onServiceSelect) {
+                    onServiceSelect(service.id);
+                    console.log('✅ HomeScreen: onServiceSelect called successfully');
+                  } else {
+                    console.error('❌ HomeScreen: onServiceSelect is undefined!');
+                  }
+                }}
               >
                 <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.serviceIconContainer}>
                   <Ionicons name={service.icon} size={28} color="#fff" />

@@ -16,6 +16,19 @@ export const downloadImage = async (imageUri, fileName = null, showAlert = true)
     console.log('📥 Starting image download...');
     console.log('Image URI:', imageUri);
 
+    // Check if it's a remote URL (http/https)
+    if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
+      console.log('⚠️ Remote URL detected, cannot save placeholder images');
+      if (showAlert) {
+        Alert.alert(
+          'Info',
+          'This is a placeholder image. In production, real processed images will be downloaded.',
+          [{ text: 'OK' }]
+        );
+      }
+      return false;
+    }
+
     const { status } = await MediaLibrary.requestPermissionsAsync();
     
     if (status !== 'granted') {
