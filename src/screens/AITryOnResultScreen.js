@@ -10,36 +10,25 @@ import ResultFooter from '../components/ResultFooter';
 
 const AITryOnResultScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { clothImage, clothFolder, modelImage, mode } = useSelector(state => state.aiModelTryOn);
+  const { clothImage, modelImage, clothImages, mode } = useSelector(state => state.aiModelTryOn);
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
-    console.log('📥 AI: Downloading try-on result...');
-    console.log('📊 AI: Mode:', mode);
+    console.log('📥 Downloading try-on result...');
     setIsDownloading(true);
     
     try {
-      if (mode === 'single' && modelImage) {
-        console.log('🖼️ AI: Downloading single result');
+      if (mode === 'single' && clothImage && modelImage) {
         await downloadImage(modelImage.uri, `TryOn_Result_${Date.now()}.jpg`);
-      } else if (mode === 'folder' && clothFolder) {
-        console.log('📁 AI: Downloading folder as ZIP');
-        console.log('📊 AI: Folder files count:', clothFolder.files?.length || clothFolder.fileCount);
-        const imageUris = clothFolder.files ? clothFolder.files.map(file => file.uri) : [];
-        console.log('📊 AI: Image URIs:', imageUris.length);
+      } else if (mode === 'bulk' && clothImages.length > 0) {
+        const imageUris = clothImages.map(img => img.uri);
         await downloadImagesAsZip(imageUris, `TryOn_Results_${Date.now()}.zip`);
       }
-      console.log('✅ AI: Download completed');
     } catch (error) {
-      console.error('❌ AI: Download error:', error);
+      console.error('❌ Download error:', error);
     } finally {
       setIsDownloading(false);
     }
-  };
-
-  const handleRepeat = () => {
-    dispatch(resetTryOnState());
-    navigation.navigate('AIModelTryOn');
   };
 
   const handleHome = () => {
@@ -66,7 +55,7 @@ const AITryOnResultScreen = ({ navigation }) => {
           <Text style={styles.successText}>
             {mode === 'single' 
               ? 'Your virtual try-on has been generated successfully.'
-              : `${clothFolder?.fileCount || 0} try-on results have been generated.`}
+              : `${clothImages?.length || 0} try-on results have been generated.`}
           </Text>
         </View>
 
@@ -99,28 +88,49 @@ const AITryOnResultScreen = ({ navigation }) => {
         )}
 
         {/* Multiple Results */}
-        {mode === 'folder' && clothFolder && clothFolder.fileCount > 0 && (
+        {mode === 'bulk' && clothImages && clothImages.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultLabel}>Generated Results</Text>
             <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.bulkInfo}>
               <Ionicons name="images" size={32} color="#fff" />
-              <Text style={styles.bulkText}>{clothFolder.fileCount} try-on results ready</Text>
+              <Text style={styles.bulkText}>{clothImages.length} try-on results ready</Text>
             </LinearGradient>
-            <View style={styles.folderIconContainer}>
-              <Ionicons name="folder" size={80} color="#7c3aed" />
-              <Text style={styles.folderText}>{clothFolder.name}</Text>
-            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.resultsScroll}>
+              {clothImages.map((img, index) => (
+                <View key={index} style={styles.resultThumb}>
+                  <Image source={{ uri: img.uri }} style={styles.thumbImage} />
+                  <View style={styles.thumbBadge}>
+                    <Text style={styles.thumbBadgeText}>#{index + 1}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
           </View>
         )}
       </ScrollView>
 
-      <ResultFooter 
-        isDownloading={isDownloading}
-        onDownload={handleDownload}
-        onRepeat={handleRepeat}
-        downloadText="Download Result"
-        mode={mode}
-      />
+      {/* <View style={styles.footer}>
+        <TouchableOpacity 
+          style={styles.downloadButton} 
+          onPress={handleDownload}
+          disabled={isDownloading}
+        >
+          <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.downloadGradient}>
+            {isDownloading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="download" size={20} color="#fff" />
+            )}
+            <Text style={styles.downloadButtonText}>
+              {isDownloading ? 'Downloading...' : mode === 'bulk' ? 'Download All' : 'Download Result'}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.homeButton} onPress={handleHome}>
+          <Text style={styles.homeButtonText}>Back to Home</Text>
+        </TouchableOpacity>
+      </View> */}
+      <ResultFooter  />
     </SafeAreaView>
   );
 };
@@ -268,17 +278,39 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
-  folderIconContainer: {
-    alignItems: 'center',
-    padding: 40,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
+  footer: {
+    padding: 20,
+    backgroundColor: '#fff',
   },
-  folderText: {
+  downloadButton: {
+    borderRadius: 30,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  downloadGradient: {
+    flexDirection: 'row',
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  downloadButtonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
-    marginTop: 12,
+  },
+  homeButton: {
+    paddingVertical: 16,
+    borderRadius: 30,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#7c3aed',
+  },
+  homeButtonText: {
+    color: '#7c3aed',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
