@@ -119,12 +119,20 @@ export const downloadImagesAsZip = async (imageUris, zipFileName = 'FotoLift_Ima
 
     // Share the ZIP file
     console.log('📤 Opening share dialog...');
-    await Share.open({
-      url: `file://${zipPath}`,
-      type: 'application/zip',
-      title: 'Save ZIP file',
-    });
-    console.log('✅ Share dialog opened');
+    try {
+      await Share.open({
+        url: `file://${zipPath}`,
+        type: 'application/zip',
+        title: 'Save ZIP file',
+      });
+      console.log('✅ Share completed');
+    } catch (shareError) {
+      if (shareError.message === 'User did not share') {
+        console.log('ℹ️ User cancelled share dialog');
+      } else {
+        throw shareError;
+      }
+    }
 
     // Clean up temp files
     console.log('🧹 Cleaning up temp files...');
@@ -132,13 +140,11 @@ export const downloadImagesAsZip = async (imageUris, zipFileName = 'FotoLift_Ima
     await RNFS.unlink(zipPath).catch(() => {});
     console.log('✅ Cleanup complete');
 
-    Alert.alert('Success', `ZIP file with ${imageUris.length} images created!`);
+    Alert.alert('Success', `ZIP file with ${imageUris.length} images ready!`);
     return true;
   } catch (error) {
     console.error('❌ Failed to create ZIP file');
     console.error('Error details:', error);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
     Alert.alert('Error', `Failed to create ZIP file: ${error.message}`);
     return false;
   }

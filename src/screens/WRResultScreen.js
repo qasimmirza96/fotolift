@@ -18,18 +18,24 @@ const WRResultScreen = ({ navigation }) => {
   console.log('WR Result - Folder:', folder);
 
   const handleDownload = async () => {
-    console.log('📥 Downloading wrinkle-free image/folder...');
+    console.log('📥 WR: Downloading wrinkle-free image/folder...');
+    console.log('📊 WR: Mode:', mode);
     setIsDownloading(true);
     
     try {
       if (mode === 'single' && singleImage) {
+        console.log('🖼️ WR: Downloading single image');
         await downloadImage(singleImage.uri, `WrinkleFree_${singleImage.name}`);
       } else if (mode === 'folder' && folder) {
-        const imageUris = folder.images.map(img => img.uri);
+        console.log('📁 WR: Downloading folder as ZIP');
+        console.log('📊 WR: Folder files count:', folder.files?.length || folder.fileCount);
+        const imageUris = folder.files ? folder.files.map(file => file.uri) : [];
+        console.log('📊 WR: Image URIs:', imageUris.length);
         await downloadImagesAsZip(imageUris, `WrinkleFree_${folder.name}.zip`);
       }
+      console.log('✅ WR: Download completed');
     } catch (error) {
-      console.error('❌ Download error:', error);
+      console.error('❌ WR: Download error:', error);
     } finally {
       setIsDownloading(false);
     }

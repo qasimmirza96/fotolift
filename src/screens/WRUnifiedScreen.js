@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as ImagePicker from 'expo-image-picker';
 import { useDispatch } from 'react-redux';
 import { setSingleImage, setFolder } from '../store/slices/wrinkleRemoverSlice';
+import { pickImage, pickFolder as pickFolderUtil } from '../utils/folderPicker';
 
 const WRUnifiedScreen = ({ navigation }) => {
+  console.log('🎬 WRUnifiedScreen: Component rendered');
   const dispatch = useDispatch();
   const [mode, setMode] = useState(null); // 'single' | 'folder'
   const [singleImage, setSingleImageState] = useState(null);
@@ -15,64 +16,71 @@ const WRUnifiedScreen = ({ navigation }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const pickSingleImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const image = {
-        uri: result.assets[0].uri,
-        name: result.assets[0].fileName || `Image_${Date.now()}.jpg`,
-      };
-      setSingleImageState(image);
-      setMode('single');
-      setFolderState(null);
+    console.log('📸 WR: Single image picker opened');
+    try {
+      const image = await pickImage();
+      if (image) {
+        console.log('✅ WR: Single image selected:', image.name);
+        setSingleImageState(image);
+        setMode('single');
+        setFolderState(null);
+        console.log('📊 WR: Mode set to single');
+      } else {
+        console.log('❌ WR: No image selected');
+      }
+    } catch (error) {
+      console.error('❌ WR: Error picking image:', error);
+      Alert.alert('Error', error.message || 'Failed to pick image');
     }
   };
 
-  const pickFolder = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsMultipleSelection: true,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets.length > 0) {
-      const folderData = {
-        name: `Folder_${Date.now()}`,
-        fileCount: result.assets.length,
-        images: result.assets.map(asset => ({
-          uri: asset.uri,
-          name: asset.fileName || `Image_${Date.now()}.jpg`,
-        })),
-      };
-      setFolderState(folderData);
-      setMode('folder');
-      setSingleImageState(null);
+  const handlePickFolder = async () => {
+    console.log('📁 WR: Folder picker opened');
+    try {
+      const folderData = await pickFolderUtil();
+      if (folderData) {
+        console.log('✅ WR: Folder selected:', folderData.name);
+        console.log('📊 WR: Folder file count:', folderData.fileCount);
+        setFolderState(folderData);
+        setMode('folder');
+        setSingleImageState(null);
+        console.log('📊 WR: Mode set to folder');
+      } else {
+        console.log('❌ WR: No folder selected');
+      }
+    } catch (error) {
+      console.error('❌ WR: Error picking folder:', error);
+      Alert.alert('Error', error.message || 'Failed to pick folder');
     }
   };
 
   const handleProcess = () => {
+    console.log('🚀 WR: Process button pressed');
+    console.log('📊 WR: Current mode:', mode);
     setIsProcessing(true);
     
     if (mode === 'single') {
+      console.log('📤 WR: Dispatching single image to Redux');
       dispatch(setSingleImage(singleImage));
     } else {
+      console.log('📤 WR: Dispatching folder to Redux');
       dispatch(setFolder(folder));
     }
     
     setTimeout(() => {
       setIsProcessing(false);
+      console.log('✅ WR: Processing complete, navigating to WRResult');
       navigation.navigate('WRResult');
     }, 2000);
   };
 
   const handleReset = () => {
+    console.log('🔄 WR: Reset button pressed');
+    console.log('🧹 WR: Clearing mode, image, and folder');
     setMode(null);
     setSingleImageState(null);
     setFolderState(null);
+    console.log('✅ WR: Reset complete');
   };
 
   return (
@@ -106,49 +114,39 @@ const WRUnifiedScreen = ({ navigation }) => {
                 <Text style={styles.optionDesc}>Process one image</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.optionCard} onPress={pickFolder}>
+              <TouchableOpacity style={styles.optionCard} onPress={handlePickFolder}>
                 <View style={styles.optionIcon}>
-                  <Ionicons name="images" size={32} color="#663399" />
+                  <Ionicons name="folder" size={32} color="#663399" />
                 </View>
-                <Text style={styles.optionTitle}>Multiple  Images</Text>
-                <Text style={styles.optionDesc}>Batch processing</Text>
+                <Text style={styles.optionTitle}>Folder </Text>
+                <Text style={styles.optionDesc}>Select entire folder</Text>
               </TouchableOpacity>
             </View>
           </View>
         ) : mode === 'single' && singleImage ? (
           <View style={styles.previewSection}>
-            <View style={styles.previewHeader}>
-              <Text style={styles.sectionTitle}>Selected Image</Text>
-              <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
-                <Ionicons name="close-circle" size={20} color="#666" />
+            <Text style={styles.sectionTitle}>Selected Image</Text>
+            <View style={styles.imageWrapper}>
+              <Image source={{ uri: singleImage.uri }} style={styles.previewImage} />
+              <TouchableOpacity onPress={handleReset} style={styles.removeIcon}>
+                <Ionicons name="close-circle" size={32} color="#FF3B30" />
               </TouchableOpacity>
             </View>
-            <Image source={{ uri: singleImage.uri }} style={styles.previewImage} />
-            <TouchableOpacity style={styles.changeButton} onPress={pickSingleImage}>
-              <Ionicons name="refresh" size={18} color="#663399" />
-              <Text style={styles.changeButtonText}>Change Image</Text>
-            </TouchableOpacity>
           </View>
         ) : mode === 'folder' && folder ? (
           <View style={styles.previewSection}>
             <View style={styles.previewHeader}>
-              <Text style={styles.sectionTitle}>{folder.fileCount} Images Selected</Text>
+              <View>
+                <Text style={styles.sectionTitle}>{folder.name}</Text>
+                <Text style={styles.folderSubtitle}>{folder.fileCount} images</Text>
+              </View>
               <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
                 <Ionicons name="close-circle" size={20} color="#666" />
               </TouchableOpacity>
             </View>
-            <View style={styles.gridContainer}>
-              {folder.images.slice(0, 6).map((img, index) => (
-                <Image key={index} source={{ uri: img.uri }} style={styles.gridImage} />
-              ))}
+            <View style={styles.folderIconContainer}>
+              <Ionicons name="folder" size={80} color="#663399" />
             </View>
-            {folder.fileCount > 6 && (
-              <Text style={styles.moreText}>+{folder.fileCount - 6} more images</Text>
-            )}
-            <TouchableOpacity style={styles.changeButton} onPress={pickFolder}>
-              <Ionicons name="refresh" size={18} color="#663399" />
-              <Text style={styles.changeButtonText}>Change Selection</Text>
-            </TouchableOpacity>
           </View>
         ) : null}
       </ScrollView>
@@ -276,46 +274,35 @@ const styles = StyleSheet.create({
   resetButton: {
     padding: 4,
   },
+  folderSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+  imageWrapper: {
+    position: 'relative',
+  },
+  removeIcon: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+  },
+  folderIconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+  },
   previewImage: {
     width: '100%',
     height: 300,
     borderRadius: 16,
     backgroundColor: '#f5f5f5',
-    marginBottom: 12,
-  },
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  gridImage: {
-    width: '31.5%',
-    aspectRatio: 1,
-    borderRadius: 12,
-    backgroundColor: '#f5f5f5',
-  },
-  moreText: {
-    textAlign: 'center',
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
-  },
-  changeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#663399',
-    backgroundColor: '#fff',
-  },
-  changeButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#663399',
   },
   footer: {
     padding: 20,
