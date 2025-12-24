@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { VideoView, useVideoPlayer } from 'expo-video';
@@ -24,41 +24,35 @@ const videoSources = [
 ];
 
 const HomeScreen = ({ navigation, onServiceSelect }) => {
-  console.log('🏠 HomeScreen: Component rendered');
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [appState, setAppState] = useState(AppState.currentState);
   
-  const localPlayer = useVideoPlayer(videoSources[currentVideoIndex], (player) => {
+  const localPlayer = useVideoPlayer(videoSources[0], (player) => {
     player.loop = true;
     player.muted = true;
     player.play();
   });
 
   useEffect(() => {
-    const handleAppStateChange = (nextAppState) => {
-      if (appState.match(/inactive|background/) && nextAppState === 'active') {
-        localPlayer.play();
-      } else if (nextAppState.match(/inactive|background/)) {
-        localPlayer.pause();
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        localPlayer?.play();
+      } else {
+        localPlayer?.pause();
       }
-      setAppState(nextAppState);
-    };
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    });
     return () => subscription?.remove();
-  }, [appState, localPlayer]);
+  }, []);
 
   useEffect(() => {
-    console.log('🎥 HomeScreen: Video index changed to:', currentVideoIndex);
     const interval = setInterval(() => {
       setCurrentVideoIndex((prev) => (prev + 1) % videoSources.length);
     }, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleStartJourney = () => {
-    console.log('🚀 HomeScreen: Start Journey pressed');
-  };
+  const handleServicePress = useCallback((serviceId) => {
+    onServiceSelect?.(serviceId);
+  }, [onServiceSelect]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -72,12 +66,6 @@ const HomeScreen = ({ navigation, onServiceSelect }) => {
           <View style={styles.brandingOverlay}>
             <Text style={styles.heroTitle}>FotoLift</Text>
             <Text style={styles.heroSubtitle}>Elevate Your Photography</Text>
-          </View>
-          
-          <View style={styles.indicators}>
-            {videoSources.map((_, index) => (
-              <View key={index} style={[styles.indicator, index === currentVideoIndex && styles.activeIndicator]} />
-            ))}
           </View>
         </View>
         
@@ -93,16 +81,7 @@ const HomeScreen = ({ navigation, onServiceSelect }) => {
               <TouchableOpacity 
                 key={service.id} 
                 style={styles.serviceCard}
-                onPress={() => {
-                  console.log(`👆 HomeScreen: Service pressed - ${service.title} (ID: ${service.id})`);
-                  console.log('📞 HomeScreen: Calling onServiceSelect with ID:', service.id);
-                  if (onServiceSelect) {
-                    onServiceSelect(service.id);
-                    console.log('✅ HomeScreen: onServiceSelect called successfully');
-                  } else {
-                    console.error('❌ HomeScreen: onServiceSelect is undefined!');
-                  }
-                }}
+                onPress={() => handleServicePress(service.id)}
               >
                 <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.serviceIconContainer}>
                   <Ionicons name={service.icon} size={28} color="#fff" />
@@ -114,7 +93,7 @@ const HomeScreen = ({ navigation, onServiceSelect }) => {
         </View>
         
         <View style={styles.ctaSection}>
-          <TouchableOpacity onPress={handleStartJourney}>
+          <TouchableOpacity>
             <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.startButton} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
               <Text style={styles.startButtonText}>Get Started</Text>
               <Ionicons name="arrow-forward" size={20} color="#fff" />

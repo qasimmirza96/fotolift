@@ -5,16 +5,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import store from './src/store/simpleStore';
 import PlainNavigator from './src/navigation/PlainNavigator';
 
-console.log('🚀 App: Testing with Redux + Simple Navigation');
-console.log('📊 Store state:', store.getState());
-
 export default function App() {
-  console.log('🚀 QAXIM: APP Rendering with Redux...');
-
-  
-  
   return (
-    <SafeAreaProvider >
+    <SafeAreaProvider>
       <Provider store={store}>
         <PlainNavigator />
         <StatusBar style="auto" />

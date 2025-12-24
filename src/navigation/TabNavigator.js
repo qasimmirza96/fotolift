@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,12 +29,8 @@ const TabNavigator = () => {
   const [currentScreen, setCurrentScreen] = useState('Home');
   
   const navigation = {
-    navigate: (screen) => {
-      console.log('Navigating to:', screen);
-      setCurrentScreen(screen);
-    },
+    navigate: (screen) => setCurrentScreen(screen),
     goBack: () => {
-      console.log('Going back from:', currentScreen);
       if (currentScreen === 'WRSingleImage' || currentScreen === 'WRFolder') {
         setCurrentScreen('WRSetup');
       } else if (currentScreen === 'WRResult') {
@@ -45,8 +41,7 @@ const TabNavigator = () => {
     },
   };
 
-  const handleServiceSelect = (serviceId) => {
-    console.log(`🎯 TabNavigator: Service ${serviceId} selected`);
+  const handleServiceSelect = useCallback((serviceId) => {
     if (serviceId === 1) {
       setCurrentScreen('BGRSetup');
     } else if (serviceId === 2) {
@@ -60,10 +55,9 @@ const TabNavigator = () => {
     } else if (serviceId === 6) {
       setCurrentScreen('TryOnGear');
     } else if (serviceId === 7) {
-      console.log('🎥 TabNavigator: Navigating to ImageToVideo');
       setCurrentScreen('ImageToVideo');
     }
-  };
+  }, []);
 
   const handleBGRContinue = (mode) => {
     if (mode === 'single') {
@@ -74,32 +68,16 @@ const TabNavigator = () => {
   };
 
   const handleBGRProcess = () => {
-    console.log('✅ BGR Processing complete');
     setCurrentScreen('BGRResult');
   };
 
-  const handleBGRDownload = () => {
-    console.log('📥 Download initiated');
-  };
-
   const handleBGRHome = () => {
-    console.log('🏠 handleBGRHome called in TabNavigator');
-    console.log('🔄 Setting currentScreen to: Home');
-    console.log('🔄 Setting activeTab to: Home');
     setCurrentScreen('Home');
     setActiveTab('Home');
-    console.log('✅ Navigation complete');
   };
 
   const handleBGRRepeat = () => {
-    console.log('🔁 handleBGRRepeat called in TabNavigator');
-    console.log('🔄 Setting currentScreen to: BGRSetup');
     setCurrentScreen('BGRSetup');
-    console.log('✅ Repeat navigation complete');
-  };
-
-  const handleIEDownload = () => {
-    console.log('📥 IE Download initiated');
   };
 
   const handleIEHome = () => {
@@ -127,7 +105,7 @@ const TabNavigator = () => {
       return <BGRFolderScreen onProcess={handleBGRProcess} onBack={() => setCurrentScreen('BGRSetup')} />;
     }
     if (currentScreen === 'BGRResult') {
-      return <BGRResultScreen onDownload={handleBGRDownload} onHome={handleBGRHome} onRepeat={handleBGRRepeat} />;
+      return <BGRResultScreen onHome={handleBGRHome} onRepeat={handleBGRRepeat} />;
     }
     if (currentScreen === 'ImageEnhancer') {
       return <ImageEnhancerScreen 
@@ -136,7 +114,7 @@ const TabNavigator = () => {
       />;
     }
     if (currentScreen === 'IEResult') {
-      return <IEResultScreen onDownload={handleIEDownload} onHome={handleIEHome} onRepeat={handleIERepeat} />;
+      return <IEResultScreen onHome={handleIEHome} onRepeat={handleIERepeat} />;
     }
     if (currentScreen === 'WRSetup') {
       return <WRUnifiedScreen navigation={navigation} />;
@@ -201,20 +179,6 @@ const TabNavigator = () => {
         <View style={[styles.tabBar, { paddingBottom: insets.bottom }]}>
         <TabButton iconName="home" label="Home" isActive={activeTab === 'Home'} onPress={() => setActiveTab('Home')} />
         <TabButton iconName="compass" label="Explore" isActive={activeTab === 'Explore'} onPress={() => setActiveTab('Explore')} />
-        
-        {/* <View style={styles.centerButtonWrapper}>
-          <TouchableOpacity style={styles.centerButtonContainer} onPress={() => console.log('Camera pressed')}>
-            <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.centerButton}>
-              <Ionicons name="camera" size={28} color="#fff" />
-            </LinearGradient>
-          </TouchableOpacity>
-        </View> */}
-
-        
-        
-        {/* <View style={styles.spacer} /> */}
-        {/* <TabButton iconName="camera" label="Camera" onPress={() => console.log('Camera pressed')} /> */}
-            {/* <View style={styles.spacer} /> */}
         <TabButton iconName="person" label="Profile" isActive={activeTab === 'User'} onPress={() => setActiveTab('User')} />
         </View>
       )}
@@ -253,36 +217,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     marginTop: 4,
-  },
-  centerButtonWrapper: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  centerButtonContainer: {
-    position: 'absolute',
-    top: -28,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#7c3aed',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  centerButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  spacer: {
-    flex: 1,
   },
 });
 

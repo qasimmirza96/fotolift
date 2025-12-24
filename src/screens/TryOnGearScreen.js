@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Dimensions, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Dimensions, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -112,8 +112,8 @@ const TryOnGearScreen = ({ navigation }) => {
   };
 
   const isInteractiveReady = selectedModel && Object.values(accessories).some(a => a);
-  const isFolderReady = folderImages.length > 0;
-  const isMultiFolderReady = multiFolderImages.length > 0;
+  const isFolderReady = folderImages.length > 0 && !isInteractiveReady;
+  const isMultiFolderReady = multiFolderImages.length > 0 && !isInteractiveReady;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -176,14 +176,17 @@ const TryOnGearScreen = ({ navigation }) => {
                     </Text>
                   </TouchableOpacity>
                   {accessories[type] && (
-                    <View style={styles.fileInfo}>
-                      <Text style={styles.fileName} numberOfLines={1}>
-                        {accessories[type].fileName || 'Selected'}
-                      </Text>
-                      <TouchableOpacity onPress={() => dispatch(removeAccessoryImage(type))}>
-                        <Ionicons name="close-circle" size={18} color="#ef4444" />
-                      </TouchableOpacity>
-                    </View>
+                    <>
+                      <Image source={{ uri: accessories[type].uri }} style={styles.accessoryPreview} />
+                      <View style={styles.fileInfo}>
+                        <Text style={styles.fileName} numberOfLines={1}>
+                          {accessories[type].name || 'Selected'}
+                        </Text>
+                        <TouchableOpacity onPress={() => dispatch(removeAccessoryImage(type))}>
+                          <Ionicons name="close-circle" size={18} color="#ef4444" />
+                        </TouchableOpacity>
+                      </View>
+                    </>
                   )}
                 </View>
               ))}
@@ -226,7 +229,11 @@ const TryOnGearScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
             <Text style={styles.helperText}>Select images following the required structure</Text>
-            <TouchableOpacity style={styles.folderButton} onPress={handleFolderPick}>
+            <TouchableOpacity 
+              style={[styles.folderButton, isInteractiveReady && styles.folderButtonDisabled]} 
+              onPress={handleFolderPick}
+              disabled={isInteractiveReady}
+            >
               <Ionicons name="folder-open-outline" size={24} color="#7c3aed" />
               <Text style={styles.folderButtonText}>
                 {folderImages.length > 0 ? `${folderImages.length} images selected` : 'Select Folder Images'}
@@ -252,7 +259,11 @@ const TryOnGearScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
             <Text style={styles.helperText}>Select multiple folders for batch processing</Text>
-            <TouchableOpacity style={styles.folderButton} onPress={handleMultiFolderPick}>
+            <TouchableOpacity 
+              style={[styles.folderButton, isInteractiveReady && styles.folderButtonDisabled]} 
+              onPress={handleMultiFolderPick}
+              disabled={isInteractiveReady}
+            >
               <Ionicons name="albums-outline" size={24} color="#7c3aed" />
               <Text style={styles.folderButtonText}>
                 {multiFolderImages.length > 0
@@ -497,6 +508,13 @@ const styles = StyleSheet.create({
     color: '#7c3aed',
     fontWeight: '600',
   },
+  accessoryPreview: {
+    width: '100%',
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    marginTop: 8,
+  },
   fileInfo: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -548,6 +566,11 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     backgroundColor: '#fafafa',
     marginBottom: 12,
+  },
+  folderButtonDisabled: {
+    borderColor: '#e5e7eb',
+    backgroundColor: '#f5f5f5',
+    opacity: 0.5,
   },
   folderButtonText: {
     fontSize: 14,
