@@ -38,6 +38,6 @@ const styles = StyleSheet.create({
 });
 
 export default PlainNavigator;
-
+ //  just for concept of navigation
 // initializing => config => executing => rendering 
 // Storage Access Framework (SAF)

@@ -1,19 +1,23 @@
-// API Routes Configuration (Using JSONPlaceholder for testing)
+// API Base URL - Update this with your backend URL
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.fotolift.com/api';
+
+// API Routes Configuration
 export const API_ROUTES = {
-  // Auth routes (mock)
+  // Auth routes
   AUTH: {
-    LOGIN: '/users/1',
-    REGISTER: '/users',
-    LOGOUT: '/users/1',
-    REFRESH: '/users/1',
+    LOGIN: '/auth/login',
+    REGISTER: '/auth/register',
+    LOGOUT: '/auth/logout',
+    REFRESH: '/auth/refresh',
   },
   
   // User routes
   USERS: {
-    PROFILE: '/users/1',
-    UPDATE_PROFILE: '/users/1',
-    DELETE_ACCOUNT: '/users/1',
-    UPLOAD_AVATAR: '/users/1',
+    PROFILE: '/user/profile',
+    UPDATE_PROFILE: '/user/profile',
+    DELETE_ACCOUNT: '/user/account',
+    UPLOAD_AVATAR: '/user/avatar',
+    CREDITS: '/user/credits',
   },
   
   // Photos routes
@@ -32,6 +36,28 @@ export const API_ROUTES = {
     GET_BY_ID: (id) => `/albums/${id}`,
     UPDATE: (id) => `/albums/${id}`,
     DELETE: (id) => `/albums/${id}`,
+  },
+  
+  // Credits routes
+  CREDITS: {
+    GET: '/user/credits',
+    DEDUCT: '/credits/deduct',
+    HISTORY: '/credits/history',
+  },
+  
+  // Subscription routes
+  SUBSCRIPTIONS: {
+    PLANS: '/subscriptions/plans',
+    CREATE: '/subscriptions/create',
+    CURRENT: '/subscriptions/current',
+    CANCEL: '/subscriptions/cancel',
+    UPDATE: '/subscriptions/update',
+  },
+  
+  // Usage routes
+  USAGE: {
+    HISTORY: '/usage/history',
+    STATS: '/usage/stats',
   },
 };
 

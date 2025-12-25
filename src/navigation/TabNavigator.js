@@ -21,7 +21,9 @@ import AITryOnResultScreen from '../screens/AITryOnResultScreen';
 import ImageToVideoScreen from '../screens/ImageToVideoScreen';
 import ImageToVideoResultScreen from '../screens/ImageToVideoResultScreen';
 import TryOnGearScreen from '../screens/TryOnGearScreen';
+import TryOnGearResultScreen from '../screens/TryOnGearResultScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import SubscriptionPlansScreen from '../screens/SubscriptionPlansScreen';
 
 const TabNavigator = () => {
   const insets = useSafeAreaInsets();
@@ -29,11 +31,17 @@ const TabNavigator = () => {
   const [currentScreen, setCurrentScreen] = useState('Home');
   
   const navigation = {
-    navigate: (screen) => setCurrentScreen(screen),
+    navigate: (screen) => {
+      console.log(`🧭 [Navigation] Navigating to: ${screen}`);
+      setCurrentScreen(screen);
+    },
     goBack: () => {
       if (currentScreen === 'WRSingleImage' || currentScreen === 'WRFolder') {
         setCurrentScreen('WRSetup');
       } else if (currentScreen === 'WRResult') {
+        setCurrentScreen('Home');
+      } else if (currentScreen === 'SubscriptionPlans') {
+        // Go back to previous screen
         setCurrentScreen('Home');
       } else {
         setCurrentScreen('Home');
@@ -137,6 +145,9 @@ const TabNavigator = () => {
     if (currentScreen === 'TryOnGear') {
       return <TryOnGearScreen navigation={navigation} />;
     }
+    if (currentScreen === 'TryOnGearResult') {
+      return <TryOnGearResultScreen navigation={navigation} />;
+    }
     if (currentScreen === 'ImageToVideo') {
       return <ImageToVideoScreen navigation={navigation} />;
     }
@@ -146,6 +157,9 @@ const TabNavigator = () => {
     
     if (currentScreen === 'Settings') {
       return <SettingsScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'SubscriptionPlans') {
+      return <SubscriptionPlansScreen navigation={navigation} />;
     }
     
     switch (activeTab) {
@@ -167,7 +181,7 @@ const TabNavigator = () => {
     </TouchableOpacity>
   );
 
-  const shouldShowTabBar = !['BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult', 'ImageEnhancer', 'IEResult', 'WRSetup', 'WRResult', 'CISetup', 'CIResult', 'AIModelTryOn', 'AITryOnResult', 'TryOnGear', 'ImageToVideo', 'ImageToVideoResult', 'Settings'].includes(currentScreen);
+  const shouldShowTabBar = !['BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult', 'ImageEnhancer', 'IEResult', 'WRSetup', 'WRResult', 'CISetup', 'CIResult', 'AIModelTryOn', 'AITryOnResult', 'TryOnGear', 'TryOnGearResult', 'ImageToVideo', 'ImageToVideoResult', 'Settings', 'SubscriptionPlans'].includes(currentScreen);
 
   return (
     <View style={styles.container}>

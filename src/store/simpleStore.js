@@ -7,6 +7,8 @@ import centralizedImageReducer from './slices/centralizedImageSlice';
 import aiModelTryOnReducer from './slices/aiModelTryOnSlice';
 import imageToVideoReducer from './slices/imageToVideoSlice';
 import tryOnGearReducer from './slices/tryOnGearSlice';
+import creditsReducer from './slices/creditsSlice';
+import subscriptionReducer from './slices/subscriptionSlice';
 
 console.log('🏪 SimpleStore: Creating minimal store...');
 
@@ -85,6 +87,8 @@ const store = configureStore({
   reducer: {
     auth: authSlice.reducer,
     photos: photosSlice.reducer,
+    credits: creditsReducer,
+    subscription: subscriptionReducer,
     bgr: bgrReducer,
     imageEnhancer: imageEnhancerReducer,
     wrinkleRemover: wrinkleRemoverReducer,

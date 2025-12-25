@@ -17,9 +17,10 @@ const initialState = {
   multiFolderImages: [],
   
   // UI & status
-  mode: 'interactive', // 'interactive' | 'folder' | 'multi-folder'
+  mode: 'idle', // 'idle' | 'interactive' | 'folder' | 'multi-folder'
   status: 'idle', // 'idle' | 'ready' | 'processing' | 'success' | 'error'
   errorMessage: null,
+  resultData: null, // Store result data after processing
 };
 
 // ================================================
@@ -188,36 +189,120 @@ const tryOnGearSlice = createSlice({
   initialState,
   reducers: {
     setSelectedModel: (state, action) => {
+      // Only allow model selection in interactive mode
+      if (state.mode !== 'interactive' && state.mode !== 'idle') {
+        return;
+      }
       state.selectedModel = action.payload;
+      state.mode = 'interactive';
+      // Clear folder modes when switching to interactive
+      state.folderImages = [];
+      state.multiFolderImages = [];
       state.status = Object.values(state.accessories).some(a => a) ? 'ready' : 'idle';
     },
     
     setAccessoryImage: (state, action) => {
+      // Only allow accessory selection in interactive mode
+      if (state.mode !== 'interactive' && state.mode !== 'idle') {
+        return;
+      }
       const { type, image } = action.payload;
       state.accessories[type] = image;
+      state.mode = 'interactive';
+      // Clear folder modes when switching to interactive
+      state.folderImages = [];
+      state.multiFolderImages = [];
       state.status = state.selectedModel && Object.values(state.accessories).some(a => a) ? 'ready' : 'idle';
     },
     
     removeAccessoryImage: (state, action) => {
+      // Only allow removal in interactive mode
+      if (state.mode !== 'interactive') {
+        return;
+      }
       const type = action.payload;
       state.accessories[type] = null;
       state.status = state.selectedModel && Object.values(state.accessories).some(a => a) ? 'ready' : 'idle';
     },
     
     setFolderImages: (state, action) => {
-      state.folderImages = action.payload;
+      const images = action.payload;
+      state.folderImages = images;
       state.mode = 'folder';
-      state.status = action.payload.length > 0 ? 'ready' : 'idle';
+      // Clear interactive mode data when switching to folder mode
+      state.selectedModel = null;
+      state.accessories = {
+        glasses: null,
+        shoes: null,
+        pants: null,
+        shirt: null,
+        jacket: null,
+        watch: null,
+      };
+      // Clear multi-folder when switching to single folder
+      state.multiFolderImages = [];
+      state.status = images.length > 0 ? 'ready' : 'idle';
     },
     
     setMultiFolderImages: (state, action) => {
-      state.multiFolderImages = action.payload;
+      const folders = action.payload;
+      state.multiFolderImages = folders;
       state.mode = 'multi-folder';
-      state.status = action.payload.length > 0 ? 'ready' : 'idle';
+      // Clear interactive mode data when switching to multi-folder mode
+      state.selectedModel = null;
+      state.accessories = {
+        glasses: null,
+        shoes: null,
+        pants: null,
+        shirt: null,
+        jacket: null,
+        watch: null,
+      };
+      // Clear single folder when switching to multi-folder
+      state.folderImages = [];
+      state.status = folders.length > 0 ? 'ready' : 'idle';
     },
     
     setMode: (state, action) => {
-      state.mode = action.payload;
+      const newMode = action.payload;
+      state.mode = newMode;
+      
+      // Clear data when switching modes
+      if (newMode === 'interactive') {
+        state.folderImages = [];
+        state.multiFolderImages = [];
+      } else if (newMode === 'folder') {
+        state.selectedModel = null;
+        state.accessories = {
+          glasses: null,
+          shoes: null,
+          pants: null,
+          shirt: null,
+          jacket: null,
+          watch: null,
+        };
+        state.multiFolderImages = [];
+      } else if (newMode === 'multi-folder') {
+        state.selectedModel = null;
+        state.accessories = {
+          glasses: null,
+          shoes: null,
+          pants: null,
+          shirt: null,
+          jacket: null,
+          watch: null,
+        };
+        state.folderImages = [];
+      }
+      
+      // Update status based on mode
+      if (newMode === 'interactive') {
+        state.status = state.selectedModel && Object.values(state.accessories).some(a => a) ? 'ready' : 'idle';
+      } else if (newMode === 'folder') {
+        state.status = state.folderImages.length > 0 ? 'ready' : 'idle';
+      } else if (newMode === 'multi-folder') {
+        state.status = state.multiFolderImages.length > 0 ? 'ready' : 'idle';
+      }
     },
     
     resetTryOnGearState: () => initialState,
@@ -230,8 +315,9 @@ const tryOnGearSlice = createSlice({
         state.status = 'processing';
         state.errorMessage = null;
       })
-      .addCase(processInteractiveTryOn.fulfilled, (state) => {
+      .addCase(processInteractiveTryOn.fulfilled, (state, action) => {
         state.status = 'success';
+        state.resultData = action.payload;
       })
       .addCase(processInteractiveTryOn.rejected, (state, action) => {
         state.status = 'error';
@@ -244,8 +330,9 @@ const tryOnGearSlice = createSlice({
         state.status = 'processing';
         state.errorMessage = null;
       })
-      .addCase(processFolderTryOn.fulfilled, (state) => {
+      .addCase(processFolderTryOn.fulfilled, (state, action) => {
         state.status = 'success';
+        state.resultData = action.payload;
       })
       .addCase(processFolderTryOn.rejected, (state, action) => {
         state.status = 'error';
@@ -258,8 +345,9 @@ const tryOnGearSlice = createSlice({
         state.status = 'processing';
         state.errorMessage = null;
       })
-      .addCase(processMultiFolderTryOn.fulfilled, (state) => {
+      .addCase(processMultiFolderTryOn.fulfilled, (state, action) => {
         state.status = 'success';
+        state.resultData = action.payload;
       })
       .addCase(processMultiFolderTryOn.rejected, (state, action) => {
         state.status = 'error';

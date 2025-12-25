@@ -93,7 +93,7 @@ const HomeScreen = ({ navigation, onServiceSelect }) => {
         </View>
         
         <View style={styles.ctaSection}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation?.navigate('Home')}>
             <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.startButton} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
               <Text style={styles.startButtonText}>Get Started</Text>
               <Ionicons name="arrow-forward" size={20} color="#fff" />
