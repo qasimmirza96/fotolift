@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, TouchableOpacity, StyleSheet, Text, BackHandler } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import HomeScreen from '../screens/HomeScreen';
 import ExploreScreen from '../screens/ExploreScreen';
+import ServicesScreen from '../screens/ServicesScreen';
 import UserScreen from '../screens/UserScreen';
 import BGRSetupScreen from '../screens/BGRSetupScreen';
 import BGRSingleImageScreen from '../screens/BGRSingleImageScreen';
@@ -33,19 +34,37 @@ const TabNavigator = () => {
   const navigation = {
     navigate: (screen) => {
       console.log(`🧭 [Navigation] Navigating to: ${screen}`);
-      setCurrentScreen(screen);
-    },
-    goBack: () => {
-      if (currentScreen === 'WRSingleImage' || currentScreen === 'WRFolder') {
-        setCurrentScreen('WRSetup');
-      } else if (currentScreen === 'WRResult') {
-        setCurrentScreen('Home');
-      } else if (currentScreen === 'SubscriptionPlans') {
-        // Go back to previous screen
+      if (['Home', 'Explore', 'Services', 'User'].includes(screen)) {
+        // If navigating to a tab, switch to that tab
+        setActiveTab(screen);
         setCurrentScreen('Home');
       } else {
-        setCurrentScreen('Home');
+        // Otherwise, navigate to a specific screen
+        setCurrentScreen(screen);
       }
+    },
+    goBack: () => {
+      // Handle navigation stack properly
+      const screenStack = [
+        'BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult',
+        'ImageEnhancer', 'IEResult',
+        'WRSetup', 'WRResult',
+        'CISetup', 'CIResult',
+        'AIModelTryOn', 'AITryOnResult',
+        'TryOnGear', 'TryOnGearResult',
+        'ImageToVideo', 'ImageToVideoResult',
+        'Settings', 'SubscriptionPlans'
+      ];
+      
+      if (screenStack.includes(currentScreen)) {
+        // If on a service screen, go back to Home
+        setCurrentScreen('Home');
+        setActiveTab('Home');
+      } else if (activeTab !== 'Home') {
+        // If on a different tab, go to Home
+        setActiveTab('Home');
+      }
+      // If already on Home, do nothing (let Android handle it)
     },
   };
 
@@ -101,6 +120,37 @@ const TabNavigator = () => {
     setCurrentScreen('Home');
     setActiveTab('Home');
   };
+
+  // Handle Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      const screenStack = [
+        'BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult',
+        'ImageEnhancer', 'IEResult',
+        'WRSetup', 'WRResult',
+        'CISetup', 'CIResult',
+        'AIModelTryOn', 'AITryOnResult',
+        'TryOnGear', 'TryOnGearResult',
+        'ImageToVideo', 'ImageToVideoResult',
+        'Settings', 'SubscriptionPlans'
+      ];
+      
+      if (screenStack.includes(currentScreen)) {
+        // If on a service screen, go back to Home
+        setCurrentScreen('Home');
+        setActiveTab('Home');
+        return true; // Prevent default behavior
+      } else if (activeTab !== 'Home') {
+        // If on a different tab, go to Home
+        setActiveTab('Home');
+        return true; // Prevent default behavior
+      }
+      // If already on Home, let Android handle it (close app)
+      return false;
+    });
+
+    return () => backHandler.remove();
+  }, [currentScreen, activeTab]);
 
   const renderScreen = () => {
     if (currentScreen === 'BGRSetup') {
@@ -167,6 +217,8 @@ const TabNavigator = () => {
         return <HomeScreen navigation={navigation} onServiceSelect={handleServiceSelect} />;
       case 'Explore':
         return <ExploreScreen navigation={navigation} onServiceSelect={handleServiceSelect} />;
+      case 'Services':
+        return <ServicesScreen navigation={navigation} onServiceSelect={handleServiceSelect} />;
       case 'User':
         return <UserScreen navigation={navigation} onNavigate={(screen) => setCurrentScreen(screen)} />;
       default:
@@ -191,9 +243,10 @@ const TabNavigator = () => {
       
       {shouldShowTabBar && (
         <View style={[styles.tabBar, { paddingBottom: insets.bottom }]}>
-        <TabButton iconName="home" label="Home" isActive={activeTab === 'Home'} onPress={() => setActiveTab('Home')} />
-        <TabButton iconName="compass" label="Explore" isActive={activeTab === 'Explore'} onPress={() => setActiveTab('Explore')} />
-        <TabButton iconName="person" label="Profile" isActive={activeTab === 'User'} onPress={() => setActiveTab('User')} />
+          <TabButton iconName="home" label="Home" isActive={activeTab === 'Home'} onPress={() => setActiveTab('Home')} />
+          <TabButton iconName="compass" label="Explore" isActive={activeTab === 'Explore'} onPress={() => setActiveTab('Explore')} />
+          <TabButton iconName="grid" label="Services" isActive={activeTab === 'Services'} onPress={() => setActiveTab('Services')} />
+          <TabButton iconName="person" label="Profile" isActive={activeTab === 'User'} onPress={() => setActiveTab('User')} />
         </View>
       )}
     </View>
