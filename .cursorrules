@@ -1,0 +1,27 @@
+# Cursor AI Rules for FotoLift Project
+
+## File Creation Rules
+- **DO NOT create or write .md (markdown) files unless explicitly requested by the user**
+- Only create documentation files when the user specifically asks for documentation
+- Focus on code implementation and fixes, not documentation
+
+## Code Style
+- Write clean, maintainable code
+- Follow React Native best practices
+- Use functional components with hooks
+- Keep components focused and modular
+
+## Third-Party Libraries
+- **DO NOT write custom code if there is a solid, well-maintained third-party library available**
+- Always prefer integrating existing, proven solutions over custom implementations
+- Research and suggest appropriate libraries before writing custom code
+- Only write custom code when:
+  - No suitable third-party library exists
+  - The library doesn't meet specific requirements
+  - The user explicitly requests custom implementation
+
+## Communication
+- Be direct and solution-focused
+- Avoid unnecessary explanations unless asked
+- Focus on solving the problem at hand
+

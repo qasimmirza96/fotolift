@@ -62,13 +62,13 @@ export const APP_CONFIG = {
 
 // Services
 export const SERVICES = [
-  { id: 1, title: 'Background Remover', icon: 'cut' },
-  { id: 2, title: 'Image Enhancer', icon: 'sparkles' },
-  { id: 3, title: 'Wrinkled to Ironed', icon: 'shirt' },
-  { id: 4, title: 'Centralized Image', icon: 'crop' },
-  { id: 5, title: 'AI Model Try-On', icon: 'person' },
-  { id: 6, title: 'Try-On Gear', icon: 'glasses' },
-  { id: 7, title: 'Image to Video', icon: 'videocam' },
+  { id: 1, title: 'Background Remover', icon: 'cut-outline' },
+  { id: 2, title: 'Image Enhancer', icon: 'sparkles-outline' },
+  { id: 3, title: 'Wrinkled to Ironed', icon: 'shirt-outline' },
+  { id: 4, title: 'Centralized Image', icon: 'crop-outline' },
+  { id: 5, title: 'AI Model Try-On', icon: 'person-outline' },
+  { id: 6, title: 'Try-On Gear', icon: 'glasses-outline' },
+  { id: 7, title: 'Image to Video', icon: 'videocam-outline' },
 ];
 
 

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +16,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchPlans, createSubscription } from '../store/slices/subscriptionSlice';
 import { fetchUserCredits } from '../store/slices/creditsSlice';
 import { SUBSCRIPTION_PLANS } from '../services/subscriptionService';
+
+const { width } = Dimensions.get('window');
 
 const SubscriptionPlansScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -37,9 +40,7 @@ const SubscriptionPlansScreen = ({ navigation }) => {
     }
 
     try {
-      // MOCK: Simulate payment (no real Stripe call)
       console.log('💳 [MOCK] Processing subscription payment...');
-      console.log('⚠️ [MOCK] This is a simulated payment - no real charge');
       
       Alert.alert(
         'Mock Payment',
@@ -49,16 +50,14 @@ const SubscriptionPlansScreen = ({ navigation }) => {
           {
             text: 'Proceed (Mock)',
             onPress: async () => {
-              // MOCK: Create subscription without real payment
               const result = await dispatch(
                 createSubscription({
                   planId: selectedPlan,
-                  paymentMethodId: 'mock_payment_method', // Mock payment method
+                  paymentMethodId: 'mock_payment_method',
                 })
               ).unwrap();
 
               if (result) {
-                // Refresh credits
                 await dispatch(fetchUserCredits());
                 
                 Alert.alert(
@@ -76,22 +75,6 @@ const SubscriptionPlansScreen = ({ navigation }) => {
           },
         ]
       );
-
-      // REAL STRIPE INTEGRATION (commented until backend is ready)
-      /*
-      // This would be the real flow:
-      // 1. Create payment intent on backend
-      // 2. Use Stripe SDK to collect payment
-      // 3. Confirm payment
-      // 4. Create subscription
-      
-      const result = await dispatch(
-        createSubscription({
-          planId: selectedPlan,
-          paymentMethodId: paymentMethod.id, // From Stripe
-        })
-      ).unwrap();
-      */
     } catch (error) {
       Alert.alert('Error', error.message || 'Failed to create subscription');
     }
@@ -106,43 +89,64 @@ const SubscriptionPlansScreen = ({ navigation }) => {
         key={plan.id}
         onPress={() => handleSelectPlan(plan.id)}
         style={[styles.planCard, isSelected && styles.planCardSelected]}
-        activeOpacity={0.8}
+        activeOpacity={0.7}
       >
         {isPopular && (
-          <View style={styles.popularBadge}>
+          <LinearGradient
+            colors={['#f59e0b', '#d97706']}
+            style={styles.popularBadge}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <Ionicons name="star" size={12} color="#fff" />
             <Text style={styles.popularBadgeText}>Most Popular</Text>
-          </View>
+          </LinearGradient>
         )}
         
         <View style={styles.planHeader}>
-          <Text style={styles.planName}>{plan.name}</Text>
-          <View style={styles.priceContainer}>
-            <Text style={styles.price}>${plan.price}</Text>
+          <View style={styles.planNameContainer}>
+            <Text style={styles.planName}>{plan.name}</Text>
+            {isSelected && (
+              <View style={styles.selectedCheckmark}>
+                <Ionicons name="checkmark-circle" size={20} color="#7c3aed" />
+              </View>
+            )}
+          </View>
+          
+          <View style={styles.priceRow}>
+            <Text style={styles.priceSymbol}>$</Text>
+            <Text style={styles.price}>{plan.price}</Text>
             <Text style={styles.pricePeriod}>/month</Text>
           </View>
         </View>
 
-        <View style={styles.creditsContainer}>
-          <Ionicons name="diamond" size={24} color="#7c3aed" />
-          <Text style={styles.creditsAmount}>{plan.credits}</Text>
-          <Text style={styles.creditsLabel}>credits/month</Text>
+        <View style={styles.creditsSection}>
+          <LinearGradient
+            colors={isSelected ? ['#faf5ff', '#f3e8ff'] : ['#f9fafb', '#f3f4f6']}
+            style={styles.creditsCard}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <View style={styles.creditsIconContainer}>
+              <Ionicons name="diamond" size={20} color="#7c3aed" />
+            </View>
+            <View style={styles.creditsInfo}>
+              <Text style={styles.creditsAmount}>{plan.credits}</Text>
+              <Text style={styles.creditsLabel}>credits per month</Text>
+            </View>
+          </LinearGradient>
         </View>
 
         <View style={styles.featuresList}>
           {plan.features.map((feature, index) => (
             <View key={index} style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={18} color="#10b981" />
+              <View style={styles.featureIcon}>
+                <Ionicons name="checkmark" size={14} color="#10b981" />
+              </View>
               <Text style={styles.featureText}>{feature}</Text>
             </View>
           ))}
         </View>
-
-        {isSelected && (
-          <View style={styles.selectedIndicator}>
-            <Ionicons name="checkmark-circle" size={24} color="#7c3aed" />
-            <Text style={styles.selectedText}>Selected</Text>
-          </View>
-        )}
       </TouchableOpacity>
     );
   };
@@ -160,6 +164,7 @@ const SubscriptionPlansScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -167,7 +172,10 @@ const SubscriptionPlansScreen = ({ navigation }) => {
         >
           <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Choose Your Plan</Text>
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle}>Upgrade to PRO</Text>
+          <Text style={styles.headerSubtitle}>Choose your plan</Text>
+        </View>
         <View style={styles.placeholder} />
       </View>
 
@@ -176,31 +184,46 @@ const SubscriptionPlansScreen = ({ navigation }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Current Balance */}
-        <View style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>Your Current Credits</Text>
-          <View style={styles.balanceValueContainer}>
-            <Ionicons name="diamond" size={28} color="#7c3aed" />
-            <Text style={styles.balanceValue}>{balance}</Text>
+        {/* Current Balance Card */}
+        <LinearGradient
+          colors={['#7c3aed', '#a855f7']}
+          style={styles.balanceCard}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.balanceHeader}>
+            <Ionicons name="diamond" size={24} color="#fff" />
+            <Text style={styles.balanceLabel}>Current Balance</Text>
+          </View>
+          <Text style={styles.balanceValue}>{balance}</Text>
+          <Text style={styles.balanceSubtext}>credits available</Text>
+        </LinearGradient>
+
+        {/* Plans Section */}
+        <View style={styles.plansSection}>
+          <Text style={styles.sectionTitle}>Subscription Plans</Text>
+          <Text style={styles.sectionSubtitle}>Select the plan that works best for you</Text>
+          
+          <View style={styles.plansContainer}>
+            {Object.values(SUBSCRIPTION_PLANS).map((plan) => renderPlanCard(plan))}
           </View>
         </View>
 
-        {/* Plans */}
-        <Text style={styles.sectionTitle}>Subscription Plans</Text>
-        <View style={styles.plansContainer}>
-          {Object.values(SUBSCRIPTION_PLANS).map((plan) => renderPlanCard(plan))}
-        </View>
-
-        {/* Info */}
+        {/* Info Card */}
         <View style={styles.infoCard}>
-          <Ionicons name="information-circle" size={20} color="#3b82f6" />
-          <Text style={styles.infoText}>
-            Credits renew automatically every month. Cancel anytime.
-          </Text>
+          <View style={styles.infoIconContainer}>
+            <Ionicons name="information-circle-outline" size={20} color="#3b82f6" />
+          </View>
+          <View style={styles.infoContent}>
+            <Text style={styles.infoTitle}>Flexible & Transparent</Text>
+            <Text style={styles.infoText}>
+              Credits renew automatically every month. Cancel anytime with no hidden fees.
+            </Text>
+          </View>
         </View>
       </ScrollView>
 
-      {/* Subscribe Button */}
+      {/* Footer Subscribe Button */}
       <View style={styles.footer}>
         <TouchableOpacity
           onPress={handleSubscribe}
@@ -212,7 +235,7 @@ const SubscriptionPlansScreen = ({ navigation }) => {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={selectedPlan ? ['#7c3aed', '#a855f7'] : ['#d1d5db', '#9ca3af']}
+            colors={selectedPlan ? ['#7c3aed', '#a855f7'] : ['#e5e7eb', '#d1d5db']}
             style={styles.subscribeGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -224,10 +247,13 @@ const SubscriptionPlansScreen = ({ navigation }) => {
               </>
             ) : (
               <>
-                <Ionicons name="diamond" size={20} color="#fff" />
+                <Ionicons name="diamond" size={18} color="#fff" />
                 <Text style={styles.subscribeButtonText}>
                   {selectedPlan ? 'Subscribe Now' : 'Select a Plan'}
                 </Text>
+                {selectedPlan && (
+                  <Ionicons name="arrow-forward" size={18} color="#fff" />
+                )}
               </>
             )}
           </LinearGradient>
@@ -240,7 +266,7 @@ const SubscriptionPlansScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafafa',
   },
   header: {
     flexDirection: 'row',
@@ -248,16 +274,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: '#f0f0f0',
   },
   backButton: {
     padding: 4,
+    borderRadius: 8,
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#1a1a1a',
+    marginBottom: 2,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: '#6b7280',
+    fontWeight: '500',
   },
   placeholder: {
     width: 32,
@@ -278,152 +316,239 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: '#6b7280',
+    fontWeight: '500',
   },
   balanceCard: {
-    backgroundColor: '#f9fafb',
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 32,
+    shadowColor: '#7c3aed',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  balanceLabel: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 8,
-  },
-  balanceValueContainer: {
+  balanceHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginBottom: 12,
+  },
+  balanceLabel: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
   },
   balanceValue: {
-    fontSize: 32,
+    fontSize: 42,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: '#fff',
+    marginBottom: 4,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 16,
+  balanceSubtext: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '500',
   },
-  plansContainer: {
-    gap: 16,
+  plansSection: {
     marginBottom: 24,
   },
-  planCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#e5e7eb',
-    position: 'relative',
-  },
-  planCardSelected: {
-    borderColor: '#7c3aed',
-    backgroundColor: '#faf5ff',
-  },
-  popularBadge: {
-    position: 'absolute',
-    top: -12,
-    right: 20,
-    backgroundColor: '#7c3aed',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  popularBadgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  planHeader: {
-    marginBottom: 16,
-  },
-  planName: {
+  sectionTitle: {
     fontSize: 24,
     fontWeight: '700',
     color: '#1a1a1a',
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  priceContainer: {
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 20,
+    fontWeight: '500',
+  },
+  plansContainer: {
+    gap: 16,
+  },
+  planCard: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  planCardSelected: {
+    borderColor: '#7c3aed',
+    backgroundColor: '#fff',
+    shadowColor: '#7c3aed',
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  popularBadge: {
+    position: 'absolute',
+    top: -10,
+    right: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    shadowColor: '#f59e0b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  popularBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  planHeader: {
+    marginBottom: 20,
+  },
+  planNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  planName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    letterSpacing: 0.3,
+  },
+  selectedCheckmark: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#f5f3ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  priceRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: 4,
   },
-  price: {
-    fontSize: 32,
-    fontWeight: '800',
+  priceSymbol: {
+    fontSize: 20,
+    fontWeight: '700',
     color: '#7c3aed',
   },
-  pricePeriod: {
-    fontSize: 16,
-    color: '#6b7280',
+  price: {
+    fontSize: 36,
+    fontWeight: '800',
+    color: '#7c3aed',
+    letterSpacing: -0.5,
   },
-  creditsContainer: {
+  pricePeriod: {
+    fontSize: 15,
+    color: '#6b7280',
+    fontWeight: '500',
+  },
+  creditsSection: {
+    marginBottom: 20,
+  },
+  creditsCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#f9fafb',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  creditsIconContainer: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    shadowColor: '#7c3aed',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  creditsInfo: {
+    flex: 1,
   },
   creditsAmount: {
     fontSize: 24,
     fontWeight: '700',
     color: '#1a1a1a',
+    marginBottom: 2,
   },
   creditsLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#6b7280',
+    fontWeight: '500',
   },
   featuresList: {
-    gap: 12,
-    marginBottom: 16,
+    gap: 14,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
-  featureText: {
-    fontSize: 14,
-    color: '#374151',
-  },
-  selectedIndicator: {
-    flexDirection: 'row',
+  featureIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#f0fdf4',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    marginTop: 8,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
   },
-  selectedText: {
+  featureText: {
+    flex: 1,
     fontSize: 14,
-    fontWeight: '600',
-    color: '#7c3aed',
+    color: '#374151',
+    fontWeight: '500',
+    lineHeight: 20,
   },
   infoCard: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
     backgroundColor: '#eff6ff',
-    padding: 16,
-    borderRadius: 12,
+    padding: 18,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#bfdbfe',
+    marginTop: 8,
+  },
+  infoIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1e40af',
+    marginBottom: 4,
   },
   infoText: {
-    flex: 1,
-    fontSize: 13,
+    fontSize: 12,
     color: '#1e40af',
     lineHeight: 18,
+    fontWeight: '500',
   },
   footer: {
     position: 'absolute',
@@ -431,17 +556,18 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
+    paddingBottom: 24,
     backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
+    borderTopColor: '#f0f0f0',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 10,
   },
   subscribeButton: {
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   subscribeButtonDisabled: {
@@ -451,17 +577,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
+    paddingVertical: 18,
     gap: 8,
   },
   subscribeButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });
 
 export default SubscriptionPlansScreen;
-
-
-

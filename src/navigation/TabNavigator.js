@@ -164,13 +164,13 @@ const TabNavigator = () => {
     
     switch (activeTab) {
       case 'Home':
-        return <HomeScreen onServiceSelect={handleServiceSelect} />;
+        return <HomeScreen navigation={navigation} onServiceSelect={handleServiceSelect} />;
       case 'Explore':
-        return <ExploreScreen />;
+        return <ExploreScreen navigation={navigation} onServiceSelect={handleServiceSelect} />;
       case 'User':
         return <UserScreen navigation={navigation} onNavigate={(screen) => setCurrentScreen(screen)} />;
       default:
-        return <HomeScreen onServiceSelect={handleServiceSelect} />;
+        return <HomeScreen navigation={navigation} onServiceSelect={handleServiceSelect} />;
     }
   };
 

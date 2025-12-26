@@ -8,13 +8,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { height } = Dimensions.get('window');
 
 const coreServices = [
-  { id: 1, title: 'Background Remover', icon: 'cut' },
-  { id: 2, title: 'Image Enhancer', icon: 'sparkles' },
-  { id: 3, title: 'Wrinkled to Ironed', icon: 'shirt' },
-  { id: 4, title: 'Centralized Image', icon: 'crop' },
-  { id: 5, title: 'AI Model Try-On', icon: 'person' },
-  { id: 6, title: 'Try-On Gear', icon: 'glasses' },
-  { id: 7, title: 'Image to Video', icon: 'videocam' },
+  { id: 1, title: 'Background Remover', icon: 'cut-outline' },
+  { id: 2, title: 'Image Enhancer', icon: 'sparkles-outline' },
+  { id: 3, title: 'Wrinkled to Ironed', icon: 'shirt-outline' },
+  { id: 4, title: 'Centralized Image', icon: 'crop-outline' },
+  { id: 5, title: 'AI Model Try-On', icon: 'person-outline' },
+  { id: 6, title: 'Try-On Gear', icon: 'glasses-outline' },
+  { id: 7, title: 'Image to Video', icon: 'videocam-outline' },
 ];
 
 const videoSources = [
@@ -93,12 +93,37 @@ const HomeScreen = ({ navigation, onServiceSelect }) => {
         </View>
         
         <View style={styles.ctaSection}>
-          <TouchableOpacity onPress={() => navigation?.navigate('Home')}>
-            <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.startButton} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-              <Text style={styles.startButtonText}>Get Started</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
-            </LinearGradient>
-          </TouchableOpacity>
+          <View style={styles.ctaButtonsRow}>
+            <TouchableOpacity 
+              onPress={() => navigation?.navigate('Home')}
+              style={styles.ctaButtonWrapper}
+            >
+              <LinearGradient 
+                colors={['#7c3aed', '#a855f7']} 
+                style={styles.startButton} 
+                start={{ x: 0, y: 0 }} 
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={styles.startButtonText}>Get Started</Text>
+                <Ionicons name="arrow-forward" size={18} color="#fff" />
+              </LinearGradient>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              onPress={() => navigation?.navigate('SubscriptionPlans')}
+              style={styles.ctaButtonWrapper}
+            >
+              <LinearGradient 
+                colors={['#fef3c7', '#fde68a']} 
+                style={styles.proButton} 
+                start={{ x: 0, y: 0 }} 
+                end={{ x: 1, y: 0 }}
+              >
+                <Ionicons name="diamond" size={18} color="#f59e0b" />
+                <Text style={styles.proButtonText}>Get PRO</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -243,14 +268,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingBottom: 40,
   },
+  ctaButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
+  ctaButtonWrapper: {
+    flex: 1,
+  },
   startButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
     borderRadius: 30,
-    gap: 8,
+    gap: 6,
     shadowColor: '#7c3aed',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -259,7 +292,29 @@ const styles = StyleSheet.create({
   },
   startButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  proButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+    gap: 6,
+    borderWidth: 1.5,
+    borderColor: '#fbbf24',
+    shadowColor: '#f59e0b',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  proButtonText: {
+    color: '#92400e',
+    fontSize: 15,
     fontWeight: '700',
     letterSpacing: 0.5,
   },

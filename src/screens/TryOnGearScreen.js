@@ -35,12 +35,12 @@ const MODELS = [
 ];
 
 const ACCESSORY_TYPES = [
-  { type: 'glasses', label: 'Glasses / Cap / Hat / Bag', icon: 'glasses' },
-  { type: 'shoes', label: 'Shoes', icon: 'footsteps' },
-  { type: 'pants', label: 'Pants', icon: 'fitness' },
-  { type: 'shirt', label: 'Shirt', icon: 'shirt' },
-  { type: 'jacket', label: 'Jacket', icon: 'business' },
-  { type: 'watch', label: 'Watch', icon: 'watch' },
+  { type: 'glasses', label: 'Glasses / Cap / Hat / Bag', icon: 'glasses-outline' },
+  { type: 'shoes', label: 'Shoes', icon: 'footsteps-outline' },
+  { type: 'pants', label: 'Pants', icon: 'fitness-outline' },
+  { type: 'shirt', label: 'Shirt', icon: 'shirt-outline' },
+  { type: 'jacket', label: 'Jacket', icon: 'business-outline' },
+  { type: 'watch', label: 'Watch', icon: 'watch-outline' },
 ];
 
 const MODE_OPTIONS = [
@@ -653,8 +653,7 @@ const TryOnGearScreen = ({ navigation }) => {
         <View style={styles.headerRight}>
           <CreditsDisplay 
             onPress={() => {
-              // Navigate to subscription or show credits info
-              navigation.navigate('SubscriptionPlans');
+              // Show credits info only
             }}
             style={styles.creditsDisplay}
           />
@@ -781,7 +780,14 @@ const TryOnGearScreen = ({ navigation }) => {
         onClose={() => setShowInsufficientCredits(false)}
         onSubscribe={() => {
           setShowInsufficientCredits(false);
-          navigation.navigate('SubscriptionPlans');
+          // User can navigate to subscription from home screen
+          Alert.alert(
+            'Upgrade to PRO',
+            'Visit the home screen to upgrade to PRO and get more credits.',
+            [
+              { text: 'OK', onPress: () => navigation.goBack() }
+            ]
+          );
         }}
         creditsNeeded={creditsNeeded}
         currentBalance={balance}
