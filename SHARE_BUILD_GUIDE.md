@@ -95,7 +95,7 @@ eas build --platform android --profile production
 ```bash
 # Build release APK locally
 cd android
-./gradlew assembleRelease
+./gradlew assembleRelease  
 
 # APK will be at:
 # android/app/build/outputs/apk/release/app-release.apk

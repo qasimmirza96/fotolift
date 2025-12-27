@@ -40,6 +40,8 @@ const AITryOnResultScreen = ({ navigation }) => {
     navigation.goBack();
   };
 
+  
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.header}>
