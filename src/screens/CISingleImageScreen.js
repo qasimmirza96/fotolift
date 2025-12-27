@@ -95,7 +95,7 @@ const CISingleImageScreen = ({ navigation }) => {
             ) : (
               <>
                 <Ionicons name="crop" size={20} color="#fff" />
-                <Text style={styles.processButtonText}>Centralize Image</Text>
+                <Text style={styles.processButtonText}>AI Background Remover</Text>
               </>
             )}
           </LinearGradient>

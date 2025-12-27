@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMode } from '../store/slices/bgrSlice';
@@ -21,26 +22,57 @@ const BGRSetupScreen = ({ onContinue, onBack }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#663399" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Background Remover</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <LinearGradient
+        colors={['#f8f6fc', '#ffffff', '#ffffff']}
+        style={styles.gradient}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onBack} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#663399" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Background Remover</Text>
+          <View style={styles.placeholder} />
+        </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.subtitle}>Choose how you want to process your images</Text>
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.heroSection}>
+            <View style={styles.heroImageContainer}>
+              <LinearGradient
+                colors={['#7c3aed', '#663399', '#9333ea']}
+                style={styles.heroGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="images" size={60} color="rgba(255,255,255,0.9)" />
+              </LinearGradient>
+            </View>
+            <Text style={styles.heroTitle}>Remove Backgrounds</Text>
+            <Text style={styles.heroDesc}>Instantly remove backgrounds from your images with AI precision</Text>
+          </View>
+
+          <Text style={styles.subtitle}>Choose how you want to process your images</Text>
 
         {/* Single Image Option */}
         <TouchableOpacity
           style={[styles.modeCard, mode === 'single' && styles.modeCardActive]}
           onPress={() => handleModeSelect('single')}
+          activeOpacity={0.7}
         >
           <View style={styles.modeHeader}>
-            <View style={[styles.iconContainer, mode === 'single' && styles.iconContainerActive]}>
-              <Ionicons name="image-outline" size={32} color={mode === 'single' ? '#fff' : '#663399'} />
-            </View>
+            {mode === 'single' ? (
+              <LinearGradient
+                colors={['#7c3aed', '#663399']}
+                style={styles.iconContainer}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="image" size={32} color="#fff" />
+              </LinearGradient>
+            ) : (
+              <View style={styles.iconContainer}>
+                <Ionicons name="image-outline" size={32} color="#663399" />
+              </View>
+            )}
             <View style={styles.radioContainer}>
               <View style={[styles.radio, mode === 'single' && styles.radioActive]}>
                 {mode === 'single' && <View style={styles.radioDot} />}
@@ -55,11 +87,23 @@ const BGRSetupScreen = ({ onContinue, onBack }) => {
         <TouchableOpacity
           style={[styles.modeCard, mode === 'folder' && styles.modeCardActive]}
           onPress={() => handleModeSelect('folder')}
+          activeOpacity={0.7}
         >
           <View style={styles.modeHeader}>
-            <View style={[styles.iconContainer, mode === 'folder' && styles.iconContainerActive]}>
-              <Ionicons name="folder-outline" size={32} color={mode === 'folder' ? '#fff' : '#663399'} />
-            </View>
+            {mode === 'folder' ? (
+              <LinearGradient
+                colors={['#7c3aed', '#663399']}
+                style={styles.iconContainer}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="folder" size={32} color="#fff" />
+              </LinearGradient>
+            ) : (
+              <View style={styles.iconContainer}>
+                <Ionicons name="folder-outline" size={32} color="#663399" />
+              </View>
+            )}
             <View style={styles.radioContainer}>
               <View style={[styles.radio, mode === 'folder' && styles.radioActive]}>
                 {mode === 'folder' && <View style={styles.radioDot} />}
@@ -71,15 +115,26 @@ const BGRSetupScreen = ({ onContinue, onBack }) => {
         </TouchableOpacity>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={[styles.continueButton, !mode && styles.continueButtonDisabled]}
-          onPress={handleContinue}
-          disabled={!mode}
-        >
-          <Text style={styles.continueButtonText}>Continue</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.footer}>
+          {mode ? (
+            <TouchableOpacity onPress={handleContinue} activeOpacity={0.8}>
+              <LinearGradient
+                colors={['#7c3aed', '#663399']}
+                style={styles.continueButton}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={styles.continueButtonText}>Continue</Text>
+                <Ionicons name="arrow-forward" size={20} color="#fff" style={styles.arrowIcon} />
+              </LinearGradient>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.continueButtonDisabled}>
+              <Text style={styles.continueButtonTextDisabled}>Select an option to continue</Text>
+            </View>
+          )}
+        </View>
+      </LinearGradient>
     </SafeAreaView>
   );
 };
@@ -87,49 +142,99 @@ const BGRSetupScreen = ({ onContinue, onBack }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f6fc',
+  },
+  gradient: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e6e6fa',
+    paddingVertical: 16,
+    backgroundColor: 'transparent',
   },
   backButton: {
     padding: 5,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    letterSpacing: 0.3,
   },
   placeholder: {
     width: 34,
   },
   content: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+  },
+  heroSection: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    marginBottom: 8,
+  },
+  heroImageContainer: {
+    marginBottom: 16,
+  },
+  heroGradient: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#663399',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1a1a1a',
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  heroDesc: {
+    fontSize: 15,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: 20,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#000',
+    fontSize: 14,
+    color: '#888',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 24,
+    marginTop: 8,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   modeCard: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 16,
     borderWidth: 2,
-    borderColor: '#e6e6fa',
+    borderColor: '#e8e4f3',
+    shadowColor: '#663399',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   modeCardActive: {
-    borderColor: '#663399',
-    backgroundColor: '#f9f7fc',
+    borderColor: '#7c3aed',
+    backgroundColor: '#faf9fc',
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+    transform: [{ scale: 1.02 }],
   },
   modeHeader: {
     flexDirection: 'row',
@@ -138,63 +243,84 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   iconContainer: {
-    backgroundColor: '#f9f7fc',
-    borderRadius: 16,
-    padding: 15,
-  },
-  iconContainerActive: {
-    backgroundColor: '#663399',
+    backgroundColor: '#f3f0f9',
+    borderRadius: 18,
+    padding: 16,
+    shadowColor: '#663399',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   radioContainer: {
     padding: 5,
   },
   radio: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#e6e6fa',
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2.5,
+    borderColor: '#d4c9e8',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
   radioActive: {
-    borderColor: '#663399',
+    borderColor: '#7c3aed',
   },
   radioDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#663399',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#7c3aed',
   },
   modeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 19,
+    fontWeight: '700',
+    color: '#1a1a1a',
     marginBottom: 8,
+    letterSpacing: 0.2,
   },
   modeDesc: {
     fontSize: 14,
-    color: '#000',
-    lineHeight: 20,
+    color: '#666',
+    lineHeight: 21,
   },
   footer: {
     padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e6e6fa',
+    paddingBottom: 10,
   },
   continueButton: {
-    backgroundColor: '#663399',
-    paddingVertical: 16,
-    borderRadius: 30,
+    paddingVertical: 18,
+    borderRadius: 16,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    shadowColor: '#663399',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   continueButtonDisabled: {
-    backgroundColor: '#e6e6fa',
+    backgroundColor: '#e8e4f3',
+    paddingVertical: 18,
+    borderRadius: 16,
+    alignItems: 'center',
   },
   continueButtonText: {
     color: '#fff',
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  continueButtonTextDisabled: {
+    color: '#a89fc4',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+  },
+  arrowIcon: {
+    marginLeft: 8,
   },
 });
 

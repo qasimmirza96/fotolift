@@ -6,14 +6,28 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch } from 'react-redux';
 import { setSingleImage, setFolder } from '../store/slices/wrinkleRemoverSlice';
 import { pickImage, pickFolder as pickFolderUtil } from '../utils/folderPicker';
+import AutoSlider from '../components/AutoSlider';
 
 const WRUnifiedScreen = ({ navigation }) => {
   console.log('🎬 WRUnifiedScreen: Component rendered');
   const dispatch = useDispatch();
-  const [mode, setMode] = useState(null); // 'single' | 'folder'
+  const [mode, setMode] = useState(null);
   const [singleImage, setSingleImageState] = useState(null);
   const [folder, setFolderState] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const showcaseImages = [
+    { id: '1', uri: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400' },
+    { id: '2', uri: 'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=400' },
+    { id: '3', uri: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400' },
+    { id: '4', uri: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=400' },
+    { id: '5', uri: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400' },
+    { id: '6', uri: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400' },
+    { id: '7', uri: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=400' },
+    { id: '8', uri: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400' },
+    { id: '9', uri: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400' },
+    { id: '10', uri: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400' },
+  ];
 
   const pickSingleImage = async () => {
     console.log('📸 WR: Single image picker opened');
@@ -102,6 +116,11 @@ const WRUnifiedScreen = ({ navigation }) => {
           </LinearGradient>
         </View>
 
+        <View style={styles.showcaseSection}>
+          <Text style={styles.showcaseTitle}>Our Previous Work</Text>
+          <AutoSlider images={showcaseImages} />
+        </View>
+
         {!mode ? (
           <View style={styles.selectionSection}>
             <Text style={styles.sectionTitle}>Choose Upload Type</Text>
@@ -118,7 +137,7 @@ const WRUnifiedScreen = ({ navigation }) => {
                 <View style={styles.optionIcon}>
                   <Ionicons name="folder" size={32} color="#663399" />
                 </View>
-                <Text style={styles.optionTitle}>Folder </Text>
+                <Text style={styles.optionTitle}>Folder</Text>
                 <Text style={styles.optionDesc}>Select entire folder</Text>
               </TouchableOpacity>
             </View>
@@ -136,8 +155,8 @@ const WRUnifiedScreen = ({ navigation }) => {
         ) : mode === 'folder' && folder ? (
           <View style={styles.previewSection}>
             <View style={styles.previewHeader}>
-              <View>
-                <Text style={styles.sectionTitle}>{folder.name}</Text>
+              <View style={styles.folderContainer}>
+                <Text style={styles.sectionTitle}>Selected Folder</Text>
                 <Text style={styles.folderSubtitle}>{folder.fileCount} images</Text>
               </View>
               <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
@@ -146,6 +165,8 @@ const WRUnifiedScreen = ({ navigation }) => {
             </View>
             <View style={styles.folderIconContainer}>
               <Ionicons name="folder" size={80} color="#663399" />
+              <Text style={styles.optionTitle}>{folder.name}</Text>
+              <Text style={styles.optionDesc}>{folder.fileCount} images</Text>
             </View>
           </View>
         ) : null}
@@ -215,10 +236,26 @@ const styles = StyleSheet.create({
     color: '#663399',
     marginTop: 12,
   },
+  folderContainer:{
+    // borderWidth:1,
+    // borderColor:'#e5e5e5',
+    // padding:8,
+    // borderRadius:8,
+},
   heroSubtitle: {
     fontSize: 14,
     color: '#8b5cf6',
     marginTop: 4,
+  },
+  showcaseSection: {
+    paddingVertical: 20,
+  },
+  showcaseTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   selectionSection: {
     padding: 20,
@@ -277,7 +314,7 @@ const styles = StyleSheet.create({
   folderSubtitle: {
     fontSize: 14,
     color: '#666',
-    marginTop: 2,
+    marginTop: 0,
   },
   imageWrapper: {
     position: 'relative',
@@ -293,16 +330,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 60,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fafafa',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: '#8b5cf6',
   },
   previewImage: {
     width: '100%',
-    height: 300,
+    height: 400,
     borderRadius: 16,
-    backgroundColor: '#f5f5f5',
+    resizeMode: 'cover',
   },
   footer: {
     padding: 20,
@@ -310,23 +347,19 @@ const styles = StyleSheet.create({
     borderTopColor: '#e5e5e5',
   },
   processButton: {
-    flexDirection: 'row',
     backgroundColor: '#663399',
     paddingVertical: 16,
-    borderRadius: 30,
+    borderRadius: 12,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    shadowColor: '#663399',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
   },
   processButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    marginLeft: 8,
   },
 });
 

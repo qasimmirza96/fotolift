@@ -31,15 +31,19 @@ const AITryOnResultScreen = ({ navigation }) => {
     }
   };
 
-  const handleHome = () => {
+  const handleRepeat = () => {
     dispatch(resetTryOnState());
-    navigation.navigate('Home');
+    navigation.goBack();
+  };
+
+  const handleClose = () => {
+    navigation.goBack();
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.header}>
-        <TouchableOpacity onPress={handleHome} style={styles.backButton}>
+        <TouchableOpacity onPress={handleClose} style={styles.backButton}>
           <Ionicons name="close" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.title}>Try-On Result</Text>
@@ -130,7 +134,13 @@ const AITryOnResultScreen = ({ navigation }) => {
           <Text style={styles.homeButtonText}>Back to Home</Text>
         </TouchableOpacity>
       </View> */}
-      <ResultFooter  />
+      <ResultFooter 
+        isDownloading={isDownloading}
+        onDownload={handleDownload}
+        onRepeat={handleRepeat}
+        downloadText={mode === 'bulk' ? 'Download All' : 'Download'}
+        mode={mode}
+      />
     </SafeAreaView>
   );
 };

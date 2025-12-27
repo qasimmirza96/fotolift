@@ -16,11 +16,11 @@ const ResultFooter = ({
         onPress={onDownload}
         disabled={isDownloading}
       >
-        {isDownloading ? (
+        {/* {isDownloading ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
           <Ionicons name="download-outline" size={20} color="#fff" />
-        )}
+        )} */}
         <Text style={styles.downloadButtonText}>
           {isDownloading ? 'Downloading...' : mode === 'folder' ? 'Download ZIP' : downloadText}
         </Text>

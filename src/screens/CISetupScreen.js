@@ -25,7 +25,7 @@ const CISetupScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Centralize Image</Text>
+        <Text style={styles.title}>AI Background Remover</Text>
         <View style={styles.placeholder} />
       </View>
 

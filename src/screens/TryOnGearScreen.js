@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Dimensions, Alert, Image, ActivityIndicator, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,20 +18,26 @@ import {
   resetTryOnGearState,
 } from '../store/slices/tryOnGearSlice';
 // Credits integration
-import { deductCredits, fetchUserCredits } from '../store/slices/creditsSlice';
-import { calculateCreditsNeeded } from '../services/creditsService';
-import { validateCredits } from '../utils/creditValidator';
-import CreditsDisplay from '../components/CreditsDisplay';
-import InsufficientCreditsModal from '../components/InsufficientCreditsModal';
+// import { deductCredits, fetchUserCredits } from '../store/slices/creditsSlice';
+// import { calculateCreditsNeeded } from '../services/creditsService';
+// import { validateCredits } from '../utils/creditValidator';
+// import CreditsDisplay from '../components/CreditsDisplay';
+// import InsufficientCreditsModal from '../components/InsufficientCreditsModal';
 
 const { width } = Dimensions.get('window');
 
-// Predefined models
+// Predefined models - 10 beautiful models
 const MODELS = [
-  { id: 1, name: 'Model 1', uri: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YmVhdXRpZnVsJTIwd29tYW58ZW58MHx8MHx8fDA%3D' },
-  { id: 2, name: 'Model 2', uri: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400' },
-  { id: 3, name: 'Model 3', uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400' },
-  { id: 4, name: 'Model 4', uri: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400' },
+  { id: 1, name: 'Model 1', uri: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=400&fit=crop' },
+  { id: 2, name: 'Model 2', uri: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=400&fit=crop' },
+  { id: 3, name: 'Model 3', uri: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=300&h=400&fit=crop' },
+  { id: 4, name: 'Model 4', uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=400&fit=crop' },
+  { id: 5, name: 'Model 5', uri: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=400&fit=crop' },
+  { id: 6, name: 'Model 6', uri: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&h=400&fit=crop' },
+  { id: 7, name: 'Model 7', uri: 'https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?w=300&h=400&fit=crop' },
+  { id: 8, name: 'Model 8', uri: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=400&fit=crop' },
+  { id: 9, name: 'Model 9', uri: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=300&h=400&fit=crop' },
+  { id: 10, name: 'Model 10', uri: 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=300&h=400&fit=crop' },
 ];
 
 const ACCESSORY_TYPES = [
@@ -79,20 +85,48 @@ const TryOnGearScreen = ({ navigation }) => {
   } = useSelector((state) => state.tryOnGear);
   
   // Credits state
-  const { balance } = useSelector((state) => state.credits);
-  const [showInsufficientCredits, setShowInsufficientCredits] = useState(false);
-  const [creditsNeeded, setCreditsNeeded] = useState(0);
+  // const { balance } = useSelector((state) => state.credits);
+  // const [showInsufficientCredits, setShowInsufficientCredits] = useState(false);
+  // const [creditsNeeded, setCreditsNeeded] = useState(0);
 
   // Set first accordion (interactive) as default
   const [expandedMode, setExpandedMode] = useState('interactive');
   const [showFolderGuide, setShowFolderGuide] = useState(false);
   const [showMultiFolderGuide, setShowMultiFolderGuide] = useState(false);
   const [selectedModelIndex, setSelectedModelIndex] = useState(0);
+  const modelScrollRef = useRef(null);
+  const scrollIntervalRef = useRef(null);
   const [animations] = useState({
     interactive: new Animated.Value(1), // Start at 1 (expanded) for first accordion
     folder: new Animated.Value(0),
     'multi-folder': new Animated.Value(0),
   });
+
+  // Auto-scroll for model slider
+  useEffect(() => {
+    if (expandedMode === 'interactive') {
+      scrollIntervalRef.current = setInterval(() => {
+        setSelectedModelIndex((prevIndex) => {
+          const nextIndex = (prevIndex + 1) % MODELS.length;
+          modelScrollRef.current?.scrollTo({
+            x: nextIndex * 112,
+            animated: true,
+          });
+          return nextIndex;
+        });
+      }, 3000);
+    } else {
+      if (scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+      }
+    }
+
+    return () => {
+      if (scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+      }
+    };
+  }, [expandedMode]);
 
   // Initialize first accordion on mount
   useEffect(() => {
@@ -105,7 +139,7 @@ const TryOnGearScreen = ({ navigation }) => {
       folderImagesCount: folderImages.length,
       multiFolderImagesCount: multiFolderImages.length,
       status,
-      creditsBalance: balance,
+      // creditsBalance: balance,
     });
     
     // Set first mode (interactive) as default and save to state
@@ -115,7 +149,7 @@ const TryOnGearScreen = ({ navigation }) => {
     }
 
     // Fetch credits on mount
-    dispatch(fetchUserCredits());
+    // dispatch(fetchUserCredits());
   }, []);
 
   useEffect(() => {
@@ -249,9 +283,9 @@ const TryOnGearScreen = ({ navigation }) => {
     });
     
     // Calculate credits needed based on mode
-    let creditsNeeded = 0;
-    let inputCount = 1;
-    let featureMode = 'single';
+    // let creditsNeeded = 0;
+    // let inputCount = 1;
+    // let featureMode = 'single';
 
     if (expandedMode === 'interactive') {
       if (!isInteractiveReady) {
@@ -259,42 +293,42 @@ const TryOnGearScreen = ({ navigation }) => {
         Alert.alert('Missing Information', 'Please select a model and at least one accessory');
         return;
       }
-      inputCount = 1;
-      featureMode = 'single';
-      creditsNeeded = calculateCreditsNeeded('tryon_gear', featureMode, inputCount);
+      // inputCount = 1;
+      // featureMode = 'single';
+      // creditsNeeded = calculateCreditsNeeded('tryon_gear', featureMode, inputCount);
     } else if (expandedMode === 'folder') {
       if (!isFolderReady) {
         console.warn('⚠️ [TryOnGear] Validation failed: No folder images selected');
         Alert.alert('Error', 'Please select folder images');
         return;
       }
-      inputCount = folderImages.length;
-      featureMode = 'folder';
-      creditsNeeded = calculateCreditsNeeded('tryon_gear', featureMode, inputCount);
+      // inputCount = folderImages.length;
+      // featureMode = 'folder';
+      // creditsNeeded = calculateCreditsNeeded('tryon_gear', featureMode, inputCount);
     } else if (expandedMode === 'multi-folder') {
       if (!isMultiFolderReady) {
         console.warn('⚠️ [TryOnGear] Validation failed: No folders selected');
         Alert.alert('Error', 'Please select at least one folder');
         return;
       }
-      const totalImages = multiFolderImages.reduce((sum, folder) => sum + folder.length, 0);
-      inputCount = totalImages;
-      featureMode = 'multi_folder';
-      creditsNeeded = calculateCreditsNeeded('tryon_gear', featureMode, inputCount);
+      // const totalImages = multiFolderImages.reduce((sum, folder) => sum + folder.length, 0);
+      // inputCount = totalImages;
+      // featureMode = 'multi_folder';
+      // creditsNeeded = calculateCreditsNeeded('tryon_gear', featureMode, inputCount);
     }
 
-    console.log(`💳 [TryOnGear] Credits needed: ${creditsNeeded} (mode: ${featureMode}, inputs: ${inputCount})`);
-    console.log(`💳 [TryOnGear] Current balance: ${balance}`);
+    // console.log(`💳 [TryOnGear] Credits needed: ${creditsNeeded} (mode: ${featureMode}, inputs: ${inputCount})`);
+    // console.log(`💳 [TryOnGear] Current balance: ${balance}`);
 
     // Check if user has sufficient credits
-    const validation = validateCredits(balance, 'tryon_gear', featureMode, inputCount);
+    // const validation = validateCredits(balance, 'tryon_gear', featureMode, inputCount);
     
-    if (!validation.hasSufficientCredits) {
-      console.warn('⚠️ [TryOnGear] Insufficient credits');
-      setCreditsNeeded(creditsNeeded);
-      setShowInsufficientCredits(true);
-      return;
-    }
+    // if (!validation.hasSufficientCredits) {
+    //   console.warn('⚠️ [TryOnGear] Insufficient credits');
+    //   setCreditsNeeded(creditsNeeded);
+    //   setShowInsufficientCredits(true);
+    //   return;
+    // }
     
     let result;
     try {
@@ -318,26 +352,26 @@ const TryOnGearScreen = ({ navigation }) => {
       }
 
       // Deduct credits after successful processing
-      if (result) {
-        console.log(`💳 [TryOnGear] Deducting ${creditsNeeded} credits...`);
-        try {
-          await dispatch(deductCredits({
-            feature: 'tryon_gear',
-            credits: creditsNeeded,
-            inputCount: inputCount,
-          })).unwrap();
-          console.log(`✅ [TryOnGear] Credits deducted successfully. New balance will be updated.`);
+      // if (result) {
+      //   console.log(`💳 [TryOnGear] Deducting ${creditsNeeded} credits...`);
+      //   try {
+      //     await dispatch(deductCredits({
+      //       feature: 'tryon_gear',
+      //       credits: creditsNeeded,
+      //       inputCount: inputCount,
+      //     })).unwrap();
+      //     console.log(`✅ [TryOnGear] Credits deducted successfully. New balance will be updated.`);
           
-          // Refresh credits balance
-          await dispatch(fetchUserCredits());
-        } catch (creditError) {
-          console.error('❌ [TryOnGear] Credit deduction failed:', creditError);
-          // Still navigate to result even if credit deduction fails (for mock mode)
-        }
+      //     // Refresh credits balance
+      //     await dispatch(fetchUserCredits());
+      //   } catch (creditError) {
+      //     console.error('❌ [TryOnGear] Credit deduction failed:', creditError);
+      //     // Still navigate to result even if credit deduction fails (for mock mode)
+      //   }
 
         console.log('🎉 [TryOnGear] Processing successful, navigating to result screen');
         navigation.navigate('TryOnGearResult');
-      }
+      // }
     } catch (error) {
       console.error('❌ [TryOnGear] Processing failed:', error);
       Alert.alert('Error', 'Processing failed. Please try again.');
@@ -399,13 +433,18 @@ const TryOnGearScreen = ({ navigation }) => {
           {/* Model Selection */}
           <View style={styles.subsection}>
             <Text style={styles.subsectionTitle}>Select Model</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modelSlider}>
+            <ScrollView 
+              ref={modelScrollRef}
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={styles.modelSlider}
+            >
               {MODELS.map((model, index) => (
                 <TouchableOpacity
                   key={model.id}
                   style={[
                     styles.modelCard,
-                    selectedModelIndex === index && styles.modelCardSelected,
+                    // selectedModelIndex === index && styles.modelCardSelected,
                   ]}
                   onPress={() => handleModelSelect(model, index)}
                 >
@@ -415,14 +454,20 @@ const TryOnGearScreen = ({ navigation }) => {
                     defaultSource={require('../../assets/icon.png')}
                   />
                   <Text style={styles.modelName}>{model.name}</Text>
-                  {selectedModelIndex === index && (
+                  {/* {selectedModelIndex === index && (
                     <View style={styles.selectedIndicator}>
                       <Ionicons name="checkmark-circle" size={20} color="#7c3aed" />
                     </View>
-                  )}
+                  )} */}
                 </TouchableOpacity>
               ))}
             </ScrollView>
+            {selectedModel && (
+              <View style={styles.selectedModelPreview}>
+                <Image source={{ uri: selectedModel.uri }} style={styles.selectedModelImage} />
+                <Text style={styles.selectedModelText}>Selected: {selectedModel.name}</Text>
+              </View>
+            )}
           </View>
 
           {/* Accessory Upload Grid */}
@@ -651,12 +696,12 @@ const TryOnGearScreen = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>TRY-ON GEAR</Text>
         <View style={styles.headerRight}>
-          <CreditsDisplay 
+          {/* <CreditsDisplay 
             onPress={() => {
               // Show credits info only
             }}
             style={styles.creditsDisplay}
-          />
+          /> */}
           <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
             <Ionicons name="refresh-outline" size={24} color="#7c3aed" />
           </TouchableOpacity>
@@ -775,7 +820,7 @@ const TryOnGearScreen = ({ navigation }) => {
       </Modal>
 
       {/* Insufficient Credits Modal */}
-      <InsufficientCreditsModal
+      {/* <InsufficientCreditsModal
         visible={showInsufficientCredits}
         onClose={() => setShowInsufficientCredits(false)}
         onSubscribe={() => {
@@ -791,7 +836,7 @@ const TryOnGearScreen = ({ navigation }) => {
         }}
         creditsNeeded={creditsNeeded}
         currentBalance={balance}
-      />
+      /> */}
     </SafeAreaView>
   );
 };
@@ -979,6 +1024,27 @@ const styles = StyleSheet.create({
     right: 4,
     backgroundColor: '#fff',
     borderRadius: 10,
+  },
+  selectedModelPreview: {
+    marginTop: 16,
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f5f3ff',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#7c3aed',
+  },
+  selectedModelImage: {
+    width: 120,
+    height: 160,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+    marginBottom: 8,
+  },
+  selectedModelText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#7c3aed',
   },
   accessoryGrid: {
     // two columns

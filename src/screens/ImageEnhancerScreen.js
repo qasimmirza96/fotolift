@@ -239,7 +239,7 @@ const ImageEnhancerScreen = ({ onBack, onSuccess }) => {
                   ? 'Enhance Image' 
                   : mode === 'folder' 
                     ? 'Enhance Folder'
-                    : 'Select Image or Folder'}
+                    : 'Choose Source'}
             </Text>
           </TouchableOpacity>
 

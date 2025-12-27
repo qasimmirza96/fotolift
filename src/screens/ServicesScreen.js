@@ -10,7 +10,7 @@ const coreServices = [
   { id: 1, title: 'Background Remover', icon: 'cut-outline', description: 'Remove backgrounds instantly with AI precision', color: '#7c3aed' },
   { id: 2, title: 'Image Enhancer', icon: 'sparkles-outline', description: 'Enhance image quality and clarity', color: '#a855f7' },
   { id: 3, title: 'Wrinkled to Ironed', icon: 'shirt-outline', description: 'Remove wrinkles from clothes automatically', color: '#ec4899' },
-  { id: 4, title: 'Centralized Image', icon: 'crop-outline', description: 'Center and align your images perfectly', color: '#f59e0b' },
+  { id: 4, title: 'AI Background Remover', icon: 'crop-outline', description: 'Center and align your images perfectly', color: '#f59e0b' },
   { id: 5, title: 'AI Model Try-On', icon: 'person-outline', description: 'Try on clothes with virtual models', color: '#10b981' },
   { id: 6, title: 'Try-On Gear', icon: 'glasses-outline', description: 'Try on glasses and accessories', color: '#3b82f6' },
   { id: 7, title: 'Image to Video', icon: 'videocam-outline', description: 'Transform images into stunning videos', color: '#ef4444' },

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text, BackHandler } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, BackHandler, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,22 +30,25 @@ const TabNavigator = () => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState('Home');
   const [currentScreen, setCurrentScreen] = useState('Home');
+  const [previousScreen, setPreviousScreen] = useState('Home');
   
   const navigation = {
     navigate: (screen) => {
       console.log(`🧭 [Navigation] Navigating to: ${screen}`);
       if (['Home', 'Explore', 'Services', 'User'].includes(screen)) {
         // If navigating to a tab, switch to that tab
+        setPreviousScreen(currentScreen);
         setActiveTab(screen);
         setCurrentScreen('Home');
       } else {
         // Otherwise, navigate to a specific screen
+        setPreviousScreen(currentScreen);
         setCurrentScreen(screen);
       }
     },
     goBack: () => {
-      // Handle navigation stack properly
-      const screenStack = [
+      // Go back to the previous screen or tab
+      const serviceScreens = [
         'BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult',
         'ImageEnhancer', 'IEResult',
         'WRSetup', 'WRResult',
@@ -56,19 +59,18 @@ const TabNavigator = () => {
         'Settings', 'SubscriptionPlans'
       ];
       
-      if (screenStack.includes(currentScreen)) {
-        // If on a service screen, go back to Home
+      if (serviceScreens.includes(currentScreen)) {
+        // Go back to the tab where the service was opened from
         setCurrentScreen('Home');
-        setActiveTab('Home');
+        setActiveTab(previousScreen === 'Home' ? 'Home' : activeTab);
       } else if (activeTab !== 'Home') {
-        // If on a different tab, go to Home
         setActiveTab('Home');
       }
-      // If already on Home, do nothing (let Android handle it)
     },
   };
 
   const handleServiceSelect = useCallback((serviceId) => {
+    setPreviousScreen(activeTab);
     if (serviceId === 1) {
       setCurrentScreen('BGRSetup');
     } else if (serviceId === 2) {
@@ -84,7 +86,7 @@ const TabNavigator = () => {
     } else if (serviceId === 7) {
       setCurrentScreen('ImageToVideo');
     }
-  }, []);
+  }, [activeTab]);
 
   const handleBGRContinue = (mode) => {
     if (mode === 'single') {
@@ -124,7 +126,7 @@ const TabNavigator = () => {
   // Handle Android back button
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      const screenStack = [
+      const serviceScreens = [
         'BGRSetup', 'BGRSingle', 'BGRFolder', 'BGRResult',
         'ImageEnhancer', 'IEResult',
         'WRSetup', 'WRResult',
@@ -135,22 +137,31 @@ const TabNavigator = () => {
         'Settings', 'SubscriptionPlans'
       ];
       
-      if (screenStack.includes(currentScreen)) {
-        // If on a service screen, go back to Home
+      if (serviceScreens.includes(currentScreen)) {
+        // Go back to the tab where service was opened from
         setCurrentScreen('Home');
-        setActiveTab('Home');
-        return true; // Prevent default behavior
+        setActiveTab(previousScreen);
+        return true;
       } else if (activeTab !== 'Home') {
-        // If on a different tab, go to Home
         setActiveTab('Home');
-        return true; // Prevent default behavior
+        return true;
+      } else if (activeTab === 'Home' && currentScreen === 'Home') {
+        // Show exit confirmation
+        Alert.alert(
+          'Exit App',
+          'Are you sure you want to exit?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Exit', onPress: () => BackHandler.exitApp() }
+          ]
+        );
+        return true;
       }
-      // If already on Home, let Android handle it (close app)
       return false;
     });
 
     return () => backHandler.remove();
-  }, [currentScreen, activeTab]);
+  }, [currentScreen, activeTab, previousScreen]);
 
   const renderScreen = () => {
     if (currentScreen === 'BGRSetup') {

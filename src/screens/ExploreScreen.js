@@ -37,7 +37,7 @@ const ExploreScreen = ({ navigation, onServiceSelect }) => {
       title: 'Wrinkled to Ironed',
       icon: 'shirt-outline',
       images: [
-        'https://images.unsplash.com/photo-1585052201332-b8c0ce30972f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZHJlc3N8ZW58MHx8MHx8fDA%3D',
+        'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y2xvdGhlc3xlbnwwfHwwfHx8MA%3D%3D',
         'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8ZHJlc3N8ZW58MHx8MHx8fDA%3D',
         'https://images.unsplash.com/photo-1612336307429-8a898d10e223?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         'https://images.unsplash.com/photo-1605763240000-7e93b172d754?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGRyZXNzfGVufDB8fDB8fHww'
@@ -45,7 +45,7 @@ const ExploreScreen = ({ navigation, onServiceSelect }) => {
     },
     {
       id: 4,
-      title: 'Centralized Image',
+      title: 'AI Background Remover',
       icon: 'crop-outline',
       images: [
         'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=200&h=150&fit=crop',
@@ -126,7 +126,11 @@ const ExploreScreen = ({ navigation, onServiceSelect }) => {
             onPress={() => handleServicePress(service.id)}
             activeOpacity={0.8}
           >
-            <Image source={{ uri: image }} style={styles.serviceImage} />
+            <Image 
+              source={{ uri: image }} 
+              style={styles.serviceImage}
+              resizeMode="cover"
+            />
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -426,6 +430,7 @@ const styles = StyleSheet.create({
     width: 160,
     height: 120,
     borderRadius: 16,
+    backgroundColor: '#f5f5f5',
   },
   bottomSpacing: {
     height: 20,

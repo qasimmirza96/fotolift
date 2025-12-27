@@ -3,12 +3,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 const { FolderPicker } = NativeModules;
 
-console.log('📱 Available Native Modules:', Object.keys(NativeModules));
-console.log('📁 FolderPicker Module:', FolderPicker);
-
 /**
  * Pick a folder using Android SAF
- * User can browse device storage and Google Drive
  */
 export const pickFolder = async () => {
   try {
@@ -18,15 +14,12 @@ export const pickFolder = async () => {
 
     if (!FolderPicker) {
       console.error('❌ FolderPicker native module not found!');
-      console.log('Available modules:', Object.keys(NativeModules));
       throw new Error('FolderPicker native module not available');
     }
 
     console.log('🔍 Opening SAF folder picker...');
     
     const result = await FolderPicker.pickFolder();
-
-    console.log('📦 Folder result:', JSON.stringify(result, null, 2));
 
     const folderData = {
       name: result.name || 'Selected Folder',
@@ -68,7 +61,7 @@ export const pickImage = async () => {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       allowsMultipleSelection: false,
       quality: 1,
     });

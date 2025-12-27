@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+
+const FEATURES = [
+  { icon: 'flash', title: 'Instant', desc: 'AI-powered removal in seconds' },
+  { icon: 'color-wand', title: 'Precise', desc: 'Perfect edge detection' },
+  { icon: 'shield-checkmark', title: 'Quality', desc: 'High-resolution output' },
+];
+
+const USE_CASES = [
+  { icon: 'cart', title: 'E-commerce', color: '#7c3aed' },
+  { icon: 'person', title: 'Portraits', color: '#ec4899' },
+  { icon: 'briefcase', title: 'Business', color: '#f59e0b' },
+  { icon: 'camera', title: 'Photography', color: '#10b981' },
+];
 
 const BackgroundRemoverScreen = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -61,6 +74,7 @@ const BackgroundRemoverScreen = ({ navigation }) => {
       </View>
 
       {/* Content */}
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
       {!selectedImage ? (
         <View style={styles.emptyState}>
           <LinearGradient colors={['#7c3aed', '#a855f7']} style={styles.iconCircle}>
@@ -83,6 +97,40 @@ const BackgroundRemoverScreen = ({ navigation }) => {
                 <Text style={styles.uploadButtonTextOutline}>Take Photo</Text>
               </View>
             </TouchableOpacity>
+          </View>
+
+          {/* Features Section */}
+          <View style={styles.featuresSection}>
+            <Text style={styles.sectionTitle}>Why Choose Us?</Text>
+            <View style={styles.featuresGrid}>
+              {FEATURES.map((feature, index) => (
+                <View key={index} style={styles.featureCard}>
+                  <View style={styles.featureIcon}>
+                    <Ionicons name={feature.icon} size={24} color="#7c3aed" />
+                  </View>
+                  <Text style={styles.featureTitle}>{feature.title}</Text>
+                  <Text style={styles.featureDesc}>{feature.desc}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Use Cases */}
+          <View style={styles.useCasesSection}>
+            <Text style={styles.sectionTitle}>Perfect For</Text>
+            <View style={styles.useCasesGrid}>
+              {USE_CASES.map((useCase, index) => (
+                <View key={index} style={styles.useCaseCard}>
+                  <LinearGradient 
+                    colors={[useCase.color, `${useCase.color}dd`]} 
+                    style={styles.useCaseIcon}
+                  >
+                    <Ionicons name={useCase.icon} size={20} color="#fff" />
+                  </LinearGradient>
+                  <Text style={styles.useCaseTitle}>{useCase.title}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
       ) : (
@@ -130,6 +178,7 @@ const BackgroundRemoverScreen = ({ navigation }) => {
           </View>
         </View>
       )}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -137,7 +186,10 @@ const BackgroundRemoverScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fafafa',
+  },
+  scrollView: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -161,10 +213,9 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   emptyState: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
+    paddingVertical: 40,
   },
   iconCircle: {
     width: 120,
@@ -190,7 +241,8 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 40,
+    marginBottom: 32,
+    paddingHorizontal: 20,
   },
   uploadButtons: {
     width: '100%',
@@ -222,7 +274,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: 30,
     gap: 12,
     backgroundColor: '#fff',
     borderWidth: 2,
@@ -232,6 +284,89 @@ const styles = StyleSheet.create({
     color: '#7c3aed',
     fontSize: 16,
     fontWeight: '700',
+  },
+  featuresSection: {
+    marginTop: 48,
+    width: '100%',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  featuresGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  featureCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  featureIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f5f3ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  featureTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  featureDesc: {
+    fontSize: 11,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  useCasesSection: {
+    marginTop: 32,
+    marginBottom: 40,
+    width: '100%',
+  },
+  useCasesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  useCaseCard: {
+    width: '48%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  useCaseIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  useCaseTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1a1a1a',
   },
   imageContainer: {
     flex: 1,

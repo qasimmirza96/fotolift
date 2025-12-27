@@ -49,8 +49,8 @@ const HomeScreen = ({ navigation, onServiceSelect }) => {
   const quickActions = [
     { id: 1, title: 'Background Remover', icon: 'cut-outline', color: '#7c3aed' },
     { id: 2, title: 'Image Enhancer', icon: 'sparkles-outline', color: '#a855f7' },
-    { id: 3, title: 'Try-On Gear', icon: 'glasses-outline', color: '#ec4899' },
-    { id: 4, title: 'Image to Video', icon: 'videocam-outline', color: '#f59e0b' },
+    { id: 6, title: 'Try-On Gear', icon: 'glasses-outline', color: '#ec4899' },
+    { id: 7, title: 'Image to Video', icon: 'videocam-outline', color: '#f59e0b' },
   ];
 
   const stats = [

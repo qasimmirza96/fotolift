@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,18 +7,26 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setClothImage, setModelImage, setClothFolder, resetTryOnState, generateTryOnResult } from '../store/slices/aiModelTryOnSlice';
 import { pickImage, pickFolder as pickFolderUtil } from '../utils/folderPicker';
 
-// Predefined model images
+// Predefined model images - 10 beautiful models
 const MODELS = [
-  { id: 1, uri: 'https://via.placeholder.com/300x400/7c3aed/fff?text=Model+1', name: 'Model 1' },
-  { id: 2, uri: 'https://via.placeholder.com/300x400/a855f7/fff?text=Model+2', name: 'Model 2' },
-  { id: 3, uri: 'https://via.placeholder.com/300x400/9333ea/fff?text=Model+3', name: 'Model 3' },
-  { id: 4, uri: 'https://via.placeholder.com/300x400/8b5cf6/fff?text=Model+4', name: 'Model 4' },
+  { id: 1, uri: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=400&fit=crop', name: 'Model 1' },
+  { id: 2, uri: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=400&fit=crop', name: 'Model 2' },
+  { id: 3, uri: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=300&h=400&fit=crop', name: 'Model 3' },
+  { id: 4, uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=400&fit=crop', name: 'Model 4' },
+  { id: 5, uri: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=400&fit=crop', name: 'Model 5' },
+  { id: 6, uri: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&h=400&fit=crop', name: 'Model 6' },
+  { id: 7, uri: 'https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?w=300&h=400&fit=crop', name: 'Model 7' },
+  { id: 8, uri: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=400&fit=crop', name: 'Model 8' },
+  { id: 9, uri: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=300&h=400&fit=crop', name: 'Model 9' },
+  { id: 10, uri: 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=300&h=400&fit=crop', name: 'Model 10' },
 ];
 
 const AIModelTryOnScreen = ({ navigation }) => {
   console.log('🎬 AIModelTryOn: Component rendered');
   const dispatch = useDispatch();
   const { status } = useSelector(state => state.aiModelTryOn);
+  const scrollViewRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
   
   const [clothMode, setClothMode] = useState(null); // 'single' | 'folder'
   const [modelMode, setModelMode] = useState(null); // 'slider' | 'upload'
@@ -26,6 +34,22 @@ const AIModelTryOnScreen = ({ navigation }) => {
   const [clothFolder, setLocalClothFolder] = useState(null);
   const [selectedModel, setSelectedModel] = useState(null);
   const [uploadedModel, setUploadedModel] = useState(null);
+
+  // Auto-scroll effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % MODELS.length;
+        scrollViewRef.current?.scrollTo({
+          x: nextIndex * 132,
+          animated: true,
+        });
+        return nextIndex;
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSelectSliderModel = (model) => {
     console.log('✅ AI: Slider model selected:', model.name);
@@ -157,26 +181,39 @@ const AIModelTryOnScreen = ({ navigation }) => {
         {/* Model Selection Slider */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Select Model</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modelSlider}>
+          <ScrollView 
+            ref={scrollViewRef}
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={styles.modelSlider}
+            scrollEnabled={true}
+          >
             {MODELS.map((model) => (
               <TouchableOpacity
                 key={model.id}
-                style={[
-                  styles.modelCard,
-                  selectedModel?.id === model.id && styles.modelCardSelected,
-                ]}
+                style={styles.modelCard}
                 onPress={() => handleSelectSliderModel(model)}
+                activeOpacity={0.7}
               >
                 <Image source={{ uri: model.uri }} style={styles.modelImage} />
-                {selectedModel?.id === model.id && (
-                  <View style={styles.selectedBadge}>
-                    <Ionicons name="checkmark-circle" size={24} color="#7c3aed" />
-                  </View>
-                )}
-                <Text style={styles.modelName}>{model.name}</Text>
+                <LinearGradient
+                  colors={['transparent', 'rgba(0,0,0,0.7)']}
+                  style={styles.modelOverlay}
+                >
+                  <Text style={styles.modelName}>{model.name}</Text>
+                </LinearGradient>
               </TouchableOpacity>
             ))}
           </ScrollView>
+          {selectedModel && (
+            <View style={styles.selectedModelPreview}>
+              <Image source={{ uri: selectedModel.uri }} style={styles.selectedModelImage} />
+              <View style={styles.selectedModelInfo}>
+                <Text style={styles.selectedModelLabel}>Selected Model</Text>
+                <Text style={styles.selectedModelText}>{selectedModel.name}</Text>
+              </View>
+            </View>
+          )}
         </View>
 
         {/* OR Divider */}
@@ -346,38 +383,67 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   modelCard: {
-    width: 120,
-    marginRight: 12,
-    borderRadius: 12,
+    width: 140,
+    height: 200,
+    marginRight: 16,
+    borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  modelCardSelected: {
-    borderColor: '#7c3aed',
-  },
-  modelCardDisabled: {
-    opacity: 0.4,
+    backgroundColor: '#f0f0f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   modelImage: {
     width: '100%',
-    height: 160,
-    backgroundColor: '#f0f0f0',
+    height: '100%',
+    resizeMode: 'cover',
   },
-  selectedBadge: {
+  modelOverlay: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
   },
   modelName: {
-    padding: 8,
     fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
+    fontWeight: '700',
+    color: '#fff',
     textAlign: 'center',
-    backgroundColor: '#f9f9f9',
+  },
+  selectedModelPreview: {
+    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f5f3ff',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#7c3aed',
+  },
+  selectedModelImage: {
+    width: 80,
+    height: 100,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+  },
+  selectedModelInfo: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  selectedModelLabel: {
+    fontSize: 12,
+    color: '#7c3aed',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  selectedModelText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
   },
   restrictionText: {
     marginTop: 12,
