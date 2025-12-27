@@ -14,14 +14,14 @@ const PlainNavigator = () => {
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
-  
-  if (!isAuthenticated) {
-    return showSignup ? (
-      <SignupScreen onSwitchToLogin={() => setShowSignup(false)} />
-    ) : (
-      <LoginScreen onSwitchToSignup={() => setShowSignup(true)} />
-    );
-  }
+  // Authentication Check
+  // if (!isAuthenticated) {
+  //   return showSignup ? (
+  //     <SignupScreen onSwitchToLogin={() => setShowSignup(false)} />
+  //   ) : (
+  //     <LoginScreen onSwitchToSignup={() => setShowSignup(true)} />
+  //   );
+  // }
   
   return (
     <View style={styles.container}>
