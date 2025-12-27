@@ -76,6 +76,7 @@ const AITryOnResultScreen = ({ navigation }) => {
                 <Image source={{ uri: modelImage.uri }} style={styles.comparisonImage} />
               </View> */}
               
+              
               {/* Try-On Result */}
               <View style={styles.comparisonItem}>
                 <Text style={styles.comparisonLabel}>Try-On Result</Text>
